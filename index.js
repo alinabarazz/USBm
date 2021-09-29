@@ -101,7 +101,16 @@ function sleep(ms) {
         setTimeout(resolve, ms);
     });
 }
-
+const withTimeout = (millis, promise) => {
+    const timeout = new Promise((resolve, reject) =>
+        setTimeout(
+            () => reject(`Timed out after ${millis} ms.`),
+            millis));
+    return Promise.race([
+        promise,
+        timeout
+    ]);
+};
 // Close popups by Jones
 async function closePopups(page) {
     if (await clickOnElement(page, '.close', 4000))
@@ -148,7 +157,8 @@ async function getCards() {
 
 async function getBattles() {
     return battles.battlesList(process.env.ACCUSERNAME).then(x=>x)
-}
+}  
+
 
 async function getQuest() {
     return quests.getPlayerQuest(process.env.ACCUSERNAME.split('@')[0])
@@ -185,6 +195,7 @@ async function getElementText(page, selector, timeout = 20000) {
     const text = await element.evaluate(el => el.textContent);
     return text;
 }
+
 
 async function getElementTextByXpath(page, selector, timeout = 20000) {
     const element = await page.waitForXPath(selector, {
@@ -234,7 +245,7 @@ async function selectCorrectBattleType(page) {
     }
 }
 
-async function startBotPlayMatch(page, myCards, quest, claimQuestReward, prioritizeQuest, useAPI, logSummary, battlesList) {
+async function startBotPlayMatch(page, myCards, quest, claimQuestReward, prioritizeQuest, useAPI, logSummary, battlesList, getDataLocal) {
 
     const ercThreshold = process.env.ERC_THRESHOLD;
     const allCardDetails = readJSONFile(fnAllCardsDetails);
@@ -429,7 +440,8 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
     let teamToPlay;
     misc.writeToLog(chalk.green('starting team selection'));
     if (useAPI) {
-            const apiResponse = await api.getPossibleTeams(matchDetails, { timeout: 90000 });
+       try {
+            const apiResponse = await withTimeout(90000, await api.getPossibleTeams(matchDetails));
             if (apiResponse && !JSON.stringify(apiResponse).includes('api limit reached')) {
                 misc.writeToLog(chalk.magenta('API Response: ' + JSON.stringify(apiResponse)));
 
@@ -466,7 +478,20 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                 }
                 teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);
                 useAPI = false;
-            }         
+            }
+        } catch (e){
+            misc.writeToLog('API taking too long. Reverting to use local history' + e);
+            const possibleTeams = await ask.possibleTeams(matchDetails).catch(e => misc.writeToLog('Error from possible team API call: ', e));
+            if (possibleTeams && possibleTeams.length) {
+                //misc.writeToLog('Possible Teams based on your cards: ', possibleTeams.length, '\n', possibleTeams);
+                misc.writeToLog('Possible Teams based on your cards: ', possibleTeams.length);
+            } else {
+                misc.writeToLog('Error: ', JSON.stringify(matchDetails), JSON.stringify(possibleTeams))
+                throw new Error('NO TEAMS available to be played');
+            }
+            teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);
+            useAPI = false;
+        }                  
     } else {
         const possibleTeams = await ask.possibleTeams(matchDetails).catch(e => misc.writeToLog('Error from possible team API call: ', e));
         if (possibleTeams && possibleTeams.length) {
@@ -546,27 +571,34 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
             await waitUntilLoaded(page);
             await page.waitForTimeout(5000);
             const winner = await await getElementText(page, '.battle-log-entry .battle-log-entry__team.win  .bio__name__display', 15000);
+            const draw = await getElementText(page, '.battle-log-entry .battle-log-entry__vs .conflict__title', 15000);
             if (winner.trim() == process.env.ACCUSERNAME.trim()) {
                 const decWon = await getElementText(page, '.battle-log-entry .battle-log-entry__vs.win  .conflict__dec', 1000);
                 misc.writeToLog(chalk.green('You won! Reward: ' + decWon + ' DEC'));
 				logSummary.push(' Battle result:' + chalk.green(' Win Reward: ' + decWon + ' DEC'));
+            } else if (draw.trim() == "Draw") {
+                misc.writeToLog(chalk.yellow("It's a draw"));
+                logSummary.push(' Battle result:' + chalk.blueBright(' Draw'));
             } else {
                 misc.writeToLog(chalk.red('You lost :('));
 				logSummary.push(' Battle result:' + chalk.red(' Lose'));
                 if (useAPI) {
                     api.reportLoss(winner);
                 }
+                if (getDataLocal == true) {
+                await battles.battlesList(winner).then(x=>x)
+                }
             }
         } catch (e) {
-            const draw = await getElementText(page, '.battle-log-entry .battle-log-entry__vs .conflict__title', 15000);
-            if (draw.trim() == "Draw") {
-                misc.writeToLog(chalk.yellow("It's a draw"));
-                logSummary.push(' Battle result:' + chalk.blueBright(' Draw'));
-            } else {
+            //const draw = await getElementText(page, '.battle-log-entry .battle-log-entry__vs .conflict__title', 15000);
+            //if (draw.trim() == "Draw") {
+                //misc.writeToLog(chalk.yellow("It's a draw"));
+                //logSummary.push(' Battle result:' + chalk.blueBright(' Draw'));
+            //} else {
                 misc.writeToLog(e);
                 misc.writeToLog(chalk.blueBright('Could not find winner'));
                 logSummary.push(chalk.blueBright(' Could not find winner'));
-                }
+                //}
         }
 
         try {
@@ -617,11 +649,13 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
         const claimQuestReward = JSON.parse(process.env.CLAIM_QUEST_REWARD.toLowerCase());
         const prioritizeQuest = JSON.parse(process.env.QUEST_PRIORITY.toLowerCase());
         const teleNotif = JSON.parse(process.env.TELEGRAM_NOTIF.toLowerCase());
-
+        const getDataLocal = JSON.parse(process.env.GET_DATA_FOR_LOCAL.toLowerCase());
+        
         let browsers = [];
         misc.writeToLogNoUsername('Headless: ' + headless);
         misc.writeToLogNoUsername('Keep Browser Open: ' + keepBrowserOpen);
         misc.writeToLogNoUsername('Login via Email: ' + loginViaEmail);
+        misc.writeToLogNoUsername('Get data for local history: ' + getDataLocal);
         misc.writeToLogNoUsername('Claim Quest Reward: ' + claimQuestReward);
         misc.writeToLogNoUsername('Prioritize Quests: ' + prioritizeQuest);
         misc.writeToLogNoUsername('Telegram Notification: ' + teleNotif);
@@ -662,7 +696,7 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
                 if (!quest) {
                     misc.writeToLog('Error for quest details. Splinterlands API didnt work or you used incorrect username');
                 }
-                await startBotPlayMatch(page, myCards, quest, claimQuestReward, prioritizeQuest, useAPI, logSummary, battlesList)
+                await startBotPlayMatch(page, myCards, quest, claimQuestReward, prioritizeQuest, useAPI, logSummary, battlesList , getDataLocal)
                 .then(() => {
                     misc.writeToLog('Closing battle');
                 })
