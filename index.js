@@ -156,8 +156,9 @@ async function getCards() {
         return myCards;
 }
 
-async function getBattles() {
-    return battles.battlesList(process.env.ACCUSERNAME).then(x=>x)
+async function getBattles(winnerName) {
+    misc.writeToLog("Gathering winner's battle data for local history backup") 
+    return battles.battlesList(winnerName).then(x=>x)
 }  
 
 
@@ -171,7 +172,7 @@ async function createBrowsers(count, headless) {
     let browsers = [];
     for (let i = 0; i < count; i++) {
         const browser = await puppeteer.launch({
-                //product: 'chrome',
+                product: 'chrome',
                 headless: headless,
                 args: process.env.CHROME_NO_SANDBOX === 'true' ? ["--no-sandbox"] : ['--disable-web-security',
                     '--disable-features=IsolateOrigins',
@@ -564,15 +565,11 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
             await page.waitForTimeout(5000);
             const winner = await await getElementText(page, '.battle-log-entry .battle-log-entry__team.win  .bio__name__display', 15000);
             const draw = await getElementText(page, '.battle-log-entry .battle-log-entry__vs .conflict__title', 15000);
+            let winnerName = winner 
             if (winner.trim() == process.env.ACCUSERNAME.trim()) {
                 const decWon = await getElementText(page, '.battle-log-entry .battle-log-entry__vs.win  .conflict__dec', 1000);
                 misc.writeToLog(chalk.green('You won! Reward: ' + decWon + ' DEC'));
 				logSummary.push(' Battle result:' + chalk.green(' Win Reward: ' + decWon + ' DEC'));
-                if (getDataLocal == true) {
-                    battlesList = await getBattles();
-                    } else {
-                        battlesList ='';
-                    }
             } else if (draw.trim() == "Draw") {
                 misc.writeToLog(chalk.yellow("It's a draw"));
                 logSummary.push(' Battle result:' + chalk.blueBright(' Draw'));
@@ -582,11 +579,12 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                 if (useAPI) {
                     api.reportLoss(winner);
                 }
-                if (getDataLocal == true) {
-                    battlesList = await getBattles();
-                    await battles.battlesList(winner).then(x=>x)
-                    }
-                }
+            }
+            if (getDataLocal == true) {
+                battlesList = await getBattles(winnerName);
+                } else {
+                    battlesList ='';
+                }  
         } catch (e) {
                 misc.writeToLog(e);
                 misc.writeToLog(chalk.blueBright('Could not find winner'));
