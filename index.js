@@ -95,6 +95,11 @@ async function checkForMissingConfigs() {
         tn.sender("ALERT: Missing ERC_THRESHOLD parameter in .env - see updated .env-example!");
         await sleep(60000);
     }
+    if (!process.env.GET_DATA_FOR_LOCAL) {
+        misc.writeToLogNoUsername(chalk.red("process.env.GET_DATA_FOR_LOCAL parameter in .env - see updated .env-example!"));
+        tn.sender("ALERT: Missing process.env.GET_DATA_FOR_LOCAL parameter in .env - see updated .env-example!");
+        await sleep(60000);
+    }
 }
 
 function sleep(ms) {
