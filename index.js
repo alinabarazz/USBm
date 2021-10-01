@@ -28,18 +28,19 @@ const version = 0.42;
 
 async function checkForUpdate() {
     await misc.writeToLogNoUsername('------------------------------------------------------------------------------------------------');
-    await fetch('http://jofri.pf-control.de/prgrms/splnterlnds/version.txt')
-    .then(response => response.json())
-    .then(newestVersion => {
-        if (newestVersion > version) {
-            tn.sender('New Update! Please download on https://github.com/PCJones/ultimate-splinterlands-bot')
-            misc.writeToLogNoUsername(chalk.green('New Update! Please download on https://github.com/PCJones/ultimate-splinterlands-bot'));
-            misc.writeToLogNoUsername(chalk.green('New Update! Please download on https://github.com/PCJones/ultimate-splinterlands-bot'));
-            misc.writeToLogNoUsername(chalk.green('New Update! Please download on https://github.com/PCJones/ultimate-splinterlands-bot'));
-        } else {
-            misc.writeToLogNoUsername('No update available');
-        }
-    })
+    //await fetch('http://jofri.pf-control.de/prgrms/splnterlnds/version.txt')
+    //.then(response => response.json())
+    //.then(newestVersion => {
+        //if (newestVersion > version) {
+            //tn.sender('New Update! Please download on https://github.com/PCJones/ultimate-splinterlands-bot')
+            //misc.writeToLogNoUsername(chalk.green('New Update! Please download on https://github.com/PCJones/ultimate-splinterlands-bot'));
+            //misc.writeToLogNoUsername(chalk.green('New Update! Please download on https://github.com/PCJones/ultimate-splinterlands-bot'));
+            //misc.writeToLogNoUsername(chalk.green('New Update! Please download on https://github.com/PCJones/ultimate-splinterlands-bot'));
+        //} else {
+            //misc.writeToLogNoUsername('No update available');
+            misc.writeToLogNoUsername('This version is still under development');
+        //}
+    //})
     misc.writeToLogNoUsername('------------------------------------------------------------------------------------------------');
 }
 
@@ -170,7 +171,7 @@ async function createBrowsers(count, headless) {
     let browsers = [];
     for (let i = 0; i < count; i++) {
         const browser = await puppeteer.launch({
-                product: 'chrome',
+                //product: 'chrome',
                 headless: headless,
                 args: process.env.CHROME_NO_SANDBOX === 'true' ? ["--no-sandbox"] : ['--disable-web-security',
                     '--disable-features=IsolateOrigins',
@@ -438,13 +439,15 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
     await page.waitForTimeout(1000);
     //TEAM SELECTION
     let teamToPlay;
+    misc.writeToLog(chalk.green('Battle details:'));  
+    misc.writeToLog ('Mana:'+  chalk.yellow(mana) + ' Rules:' + chalk.yellow(rules) + ' Splinters:' + chalk.yellow(splinters))
     misc.writeToLog(chalk.green('starting team selection'));
     if (useAPI) {
        try {
             const apiResponse = await withTimeout(90000, await api.getPossibleTeams(matchDetails));
             if (apiResponse && !JSON.stringify(apiResponse).includes('api limit reached')) {
-                misc.writeToLog(chalk.magenta('API Response: ' + JSON.stringify(apiResponse)));
-
+                misc.writeToLog(chalk.magenta('API Response Result: ')); 
+                console.log(apiResponse) 
                 teamToPlay = {
                     summoner: Object.values(apiResponse)[1],
                     cards: [Object.values(apiResponse)[1], Object.values(apiResponse)[3], Object.values(apiResponse)[5], Object.values(apiResponse)[7], Object.values(apiResponse)[9],
@@ -535,17 +538,6 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                             .then(selector => selector.click())}
                         await page.waitForTimeout(1000);
                     }
-                     
-               // for (i = 1; i <= 6; i++) {
-                    //misc.writeToLog('play: ' + teamToPlay.cards[i].toString())
-                   // await teamToPlay.cards[i] ? page.waitForXPath(`//div[@card_detail_id="${teamToPlay.cards[i].toString()}"]`, {
-                    //timeout: 10000
-                    //})
-                    //.then(selector => selector.click()) : misc.writeToLog('nocard ' + i);
-                    //await page.waitForTimeout(1000);
-                //}
-              
-          
         await page.waitForTimeout(5000);
         try {
             await page.click('.btn-green')[0]; //start fight
@@ -576,6 +568,11 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                 const decWon = await getElementText(page, '.battle-log-entry .battle-log-entry__vs.win  .conflict__dec', 1000);
                 misc.writeToLog(chalk.green('You won! Reward: ' + decWon + ' DEC'));
 				logSummary.push(' Battle result:' + chalk.green(' Win Reward: ' + decWon + ' DEC'));
+                if (getDataLocal == true) {
+                    battlesList = await getBattles();
+                    } else {
+                        battlesList ='';
+                    }
             } else if (draw.trim() == "Draw") {
                 misc.writeToLog(chalk.yellow("It's a draw"));
                 logSummary.push(' Battle result:' + chalk.blueBright(' Draw'));
@@ -586,24 +583,16 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                     api.reportLoss(winner);
                 }
                 if (getDataLocal == true) {
-                await battles.battlesList(winner).then(x=>x)
+                    battlesList = await getBattles();
+                    await battles.battlesList(winner).then(x=>x)
+                    }
                 }
-            }
         } catch (e) {
-            //const draw = await getElementText(page, '.battle-log-entry .battle-log-entry__vs .conflict__title', 15000);
-            //if (draw.trim() == "Draw") {
-                //misc.writeToLog(chalk.yellow("It's a draw"));
-                //logSummary.push(' Battle result:' + chalk.blueBright(' Draw'));
-            //} else {
                 misc.writeToLog(e);
                 misc.writeToLog(chalk.blueBright('Could not find winner'));
-                logSummary.push(chalk.blueBright(' Could not find winner'));
-                //}
+                logSummary.push(chalk.blueBright(' Could not find winner'));              
         }
-
-        try {
-            const Newquest = await getQuest();	
-			await nq.newquestUpdate(Newquest, claimQuestReward, page, logSummary);
+        try {	
 			const decRaw = await getElementText(page, 'div.balance', 2000);
 			let UpDateDec = parseFloat(Math.round((parseFloat(decRaw * 100)).toFixed(2)) / 100 ).toFixed(2);
             let newERC = (await getElementTextByXpath(page, "//div[@class='dec-options'][1]/div[@class='value'][2]/div", 2000)).split('%')[0];
@@ -612,20 +601,25 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
             logSummary.push(' New rating: ' + chalk.yellow(curRating));
 			logSummary.push(' New DEC Balance: ' + chalk.cyan(UpDateDec + ' DEC'));
 			let e = parseInt(newERC);
-				if (e >= 50) {
-					logSummary.push(' Remaining ERC: ' + chalk.green(newERC + '%'));
-				}
-				else {
-					logSummary.push(' Remaining ERC: ' + chalk.red(newERC + '%'));
-				}	
+                if (e >= 50) {
+                    newERC = chalk.green(newERC + '%')
+                }
+                else {
+                    newERC = chalk.red(newERC + '%')
+                }
+                logSummary.push(' Remaining ERC: ' + newERC);
+                misc.writeToLog('Remaining ERC: ' + newERC);		
         } catch (e) {
             misc.writeToLog(e);
-            misc.writeToLog(chalk.blueBright('Unable to get new rating'));
+            misc.writeToLog(chalk.blueBright(' Unable to get new rating'));
+            misc.writeToLog(chalk.blueBright(' Unable to get remaining ERC'));
             logSummary.push(chalk.blueBright(' Unable to get new rating'));
             logSummary.push(chalk.blueBright(' Unable to get remaining ERC '));
         }
-
+        let Newquest = await getQuest();	
+		await nq.newquestUpdate(Newquest, claimQuestReward, page, logSummary);
     } catch (e) {
+        logSummary.push(chalk.red(' Unable to proceed due to error. Please see logs'));
         throw new Error(e);
     }
 
@@ -692,7 +686,6 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
                     .catch(() => misc.writeToLog('cards collection api didnt respond. Did you use username? avoid email!'));
                 misc.writeToLog('getting user quest info from splinterlands API...');
                 const quest = await getQuest();
-                const battlesList = await getBattles();
                 if (!quest) {
                     misc.writeToLog('Error for quest details. Splinterlands API didnt work or you used incorrect username');
                 }
