@@ -179,9 +179,12 @@ async function createBrowsers(count, headless) {
         const browser = await puppeteer.launch({
                 product: 'chrome',
                 headless: headless,
-                args: process.env.CHROME_NO_SANDBOX === 'true' ? ["--no-sandbox"] : ['--disable-web-security',
-                    '--disable-features=IsolateOrigins',
-                    ' --disable-site-isolation-trials'],
+                args: process.env.CHROME_NO_SANDBOX === 'true' ? ["--no-sandbox"] : [
+                    '--incognito',
+                    '--disable-web-security',
+                    //'--disable-features=IsolateOrigins',
+                    //'--disable-site-isolation-trials'
+                ],
             });
         const page = await browser.newPage();
         await page.setDefaultNavigationTimeout(500000);
@@ -533,17 +536,21 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
             .then(selector => selector.click())
         }
         await page.waitForTimeout(10000);
-                misc.writeToLog('summoner: ' + teamToPlay.summoner.toString().padStart(3) + ' - ' + allCardDetails[(parseInt(teamToPlay.summoner))-1].name.toString());
+        misc.writeToLog('Summoner: ' + chalk.yellow(teamToPlay.summoner.toString().padStart(3)) + ' Name: ' + chalk.green(allCardDetails[(parseInt(teamToPlay.summoner))-1].name.toString()));
                 for (i = 1; i <= 6; i++) {
-                        await sleep(300);
-                        let strCard = 'nocard';
-                        if(teamToPlay.cards[i] != ''){ strCard = allCardDetails[(parseInt(teamToPlay.cards[i]))-1].name.toString(); }
-                        misc.writeToLog('play ' + i + '  : ' + teamToPlay.cards[i].toString().padStart(3) + ' - ' + strCard);
-                        if (teamToPlay.cards[i]){
-                            await page.waitForXPath(`//div[@card_detail_id="${teamToPlay.cards[i].toString()}"]`, {timeout: 20000})
-                            .then(selector => selector.click())}
-                        await page.waitForTimeout(1000);
-                    }
+                    await sleep(300);
+                    let strCard = 'nocard';
+                    if(teamToPlay.cards[i] != ''){ strCard = allCardDetails[(parseInt(teamToPlay.cards[i]))-1].name.toString(); }
+                      if(strCard !== 'nocard'){
+                        misc.writeToLog('Play: ' + chalk.yellow(teamToPlay.cards[i].toString().padStart(3)) + ' Name: ' + chalk.green(strCard));
+                      } else {
+                        misc.writeToLog(' ' + strCard);
+                      }  
+                    if (teamToPlay.cards[i]){
+                        await page.waitForXPath(`//div[@card_detail_id="${teamToPlay.cards[i].toString()}"]`, {timeout: 20000})
+                        .then(selector => selector.click())}
+                    await page.waitForTimeout(1000);
+                }
         await page.waitForTimeout(5000);
         try {
             await page.click('.btn-green')[0]; //start fight
@@ -569,7 +576,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
             await waitUntilLoaded(page);
             await page.waitForTimeout(5000);
             const winner = await await getElementText(page, '.battle-log-entry .battle-log-entry__team.win  .bio__name__display', 15000);
-            const draw = await getElementText(page, '.battle-log-entry .battle-log-entry__vs .conflict__title', 15000);
+            const draw = await getElementText(page, '.battle-log-entry .battle-log-entry__vs .conflict__title', 20000);
             let winnerName = winner 
             if (winner.trim() == process.env.ACCUSERNAME.trim()) {
                 const decWon = await getElementText(page, '.battle-log-entry .battle-log-entry__vs.win  .conflict__dec', 1000);

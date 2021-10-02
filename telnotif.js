@@ -1,7 +1,7 @@
 const chalk = require('chalk');
-const Telegram = require('telegram-notify');
-
-const notify = new Telegram({token: process.env.TELEGRAM_TOKEN, chatId: process.env.TELEGRAM_CHATID});
+const TeleBot = require('telebot');
+const bot = new TeleBot(process.env.TELEGRAM_TOKEN);
+const ChatId = process.env.TELEGRAM_CHATID
 
 function battlesummary(logSummary,tet,sleepingTime){
     try {
@@ -14,16 +14,17 @@ function battlesummary(logSummary,tet,sleepingTime){
 
         message = message + ' \n' +'Telegram https://t.me/ultimatesplinterlandsbot' + ' \n' + 'Discord https://discord.gg/hwSr7KNGs9'
 
-         notify.send(message);
+        bot.sendMessage(ChatId, message);
         console.log(chalk.green(' \n' + ' Battle result sent to telegram'));
         message = '';	
     }
     catch (e) {
          console.log(chalk.red(' [ERROR] Unable to send battle result to Telegram. Please make sure telegram setting is correct.'));
+         bot.sendMessage(ChatId, '[ERROR] Unable to send battle result.');
     } 
 }
 function sender (...logMessage) {
-     notify.send(logMessage);
+     bot.sendMessage(ChatId, logMessage);   
     return
 }
 
