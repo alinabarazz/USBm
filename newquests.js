@@ -5,7 +5,7 @@ async function newquestUpdate (Newquest, claimQuestReward, page, logSummary){
 
     const questElement = Object.values(Newquest)[1].toString();
     if (questElement === "life") {
-        coloredElement = chalk.bgWhite("Life");
+        coloredElement = chalk.white("Life");
     } else if (questElement === "water")  {
         coloredElement =chalk.cyanBright("Water");
     } else if (questElement === "earth")  {
