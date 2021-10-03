@@ -4,7 +4,7 @@ const ChatId = process.env.TELEGRAM_CHATID
 const bot = new TeleBot({
     token: process.env.TELEGRAM_TOKEN, // Required. Telegram Bot API token.
     polling: {
-        proxy: 'https://dns.quad9.net/dns-query'
+        proxy: ''
     }
 });
 
@@ -28,7 +28,7 @@ function battlesummary(logSummary,tet,sleepingTime){
          bot.sendMessage(ChatId, '[ERROR] Unable to send battle result.');
     } 
 }
-function sender (...logMessage) {
+function sender (logMessage) {
      bot.sendMessage(ChatId, logMessage);   
     return
 }
