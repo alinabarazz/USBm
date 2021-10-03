@@ -161,10 +161,6 @@ async function getCards() {
         return myCards;
 }
 
-async function getBattles(winnerName) {
-    misc.writeToLog("Gathering winner's battle data for local history backup") 
-    return battles.battlesList(winnerName).then(x=>x)
-}  
 
 
 async function getQuest() {
@@ -182,8 +178,8 @@ async function createBrowsers(count, headless) {
                 args: process.env.CHROME_NO_SANDBOX === 'true' ? ["--no-sandbox"] : [
                     '--incognito',
                     '--disable-web-security',
-                    //'--disable-features=IsolateOrigins',
-                    //'--disable-site-isolation-trials'
+                    '--disable-features=IsolateOrigins',
+                    '--disable-site-isolation-trials'
                 ],
             });
         const page = await browser.newPage();
@@ -577,8 +573,8 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
             await page.waitForTimeout(5000);
             const winner = await await getElementText(page, '.battle-log-entry .battle-log-entry__team.win  .bio__name__display', 15000);
             const draw = await getElementText(page, '.battle-log-entry .battle-log-entry__vs .conflict__title', 20000);
-            let winnerName = winner 
-            if (winner.trim() == process.env.ACCUSERNAME.trim()) {
+            let winnerName = winner.trim() 
+            if (winnerName == process.env.ACCUSERNAME.trim()) {
                 const decWon = await getElementText(page, '.battle-log-entry .battle-log-entry__vs.win  .conflict__dec', 1000);
                 misc.writeToLog(chalk.green('You won! Reward: ' + decWon + ' DEC'));
 				logSummary.push(' Battle result:' + chalk.green(' Win Reward: ' + decWon + ' DEC'));
@@ -593,10 +589,9 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                 }
             }
             if (getDataLocal == true) {
-                battlesList = await getBattles(winnerName);
-                } else {
-                    battlesList ='';
-                }  
+                misc.writeToLog("Gathering winner's battle data for local history backup") 
+                 battlesList = battles.battlesList(winnerName).then(x=>x)
+            }    
         } catch (e) {
                 misc.writeToLog(e);
                 misc.writeToLog(chalk.blueBright('Could not find winner'));
