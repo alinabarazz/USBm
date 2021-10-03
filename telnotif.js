@@ -1,7 +1,12 @@
 const chalk = require('chalk');
 const TeleBot = require('telebot');
-const bot = new TeleBot(process.env.TELEGRAM_TOKEN);
 const ChatId = process.env.TELEGRAM_CHATID
+const bot = new TeleBot({
+    token: process.env.TELEGRAM_TOKEN, // Required. Telegram Bot API token.
+    polling: {
+        proxy: 'https://dns.quad9.net/dns-query'
+    }
+});
 
 function battlesummary(logSummary,tet,sleepingTime){
     try {
@@ -27,6 +32,8 @@ function sender (...logMessage) {
      bot.sendMessage(ChatId, logMessage);   
     return
 }
+
+bot.start();
 
 exports.sender =sender; 
 exports.battlesummary = battlesummary;
