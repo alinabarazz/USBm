@@ -4,6 +4,8 @@ const fs = require('fs');
 const misc = require('./misc');
 const chalk = require('chalk');
 
+
+
 const distinct = (value, index, self) => {
     return self.indexOf(value) === index;
 }
@@ -51,11 +53,11 @@ function uniqueListByKey(arr, key) {
   }
 const extractGeneralInfo = (x) => {
     return {
-        created_date: x.created_date ? x.created_date : '',
-        match_type: x.match_type ? x.match_type : '',
+        //created_date: x.created_date ? x.created_date : '',
+        //match_type: x.match_type ? x.match_type : '',
         mana_cap: x.mana_cap ? x.mana_cap : '',
         ruleset: x.ruleset ? x.ruleset : '',
-        inactive: x.inactive ? x.inactive : ''
+        //inactive: x.inactive ? x.inactive : ''
     }
 }
 
@@ -93,14 +95,13 @@ const extractMonster = (team) => {
 
 let battlesList = [];
 let promises = [];
-let min_rating = [];
 
-const battles = (player) => getBattleHistory(player)
+const battles = async (player) =>  getBattleHistory(player)
   .then(u => u.map(x => { 
-    x.player_1 == process.env.ACCOUNT
-      ? min_rating.push(x.player_1_rating_final)
-      : min_rating.push(x.player_2_rating_final);
-    return [x.player_1, x.player_2]
+    //x.player_1 == process.env.ACCOUNT
+      //? min_rating.push(x.player_1_rating_final)
+      //: min_rating.push(x.player_2_rating_final);
+    return [x.player_1, x.player_2] 
   }).flat().filter(distinct))
   .then(ul => ul.map(user => {
     promises.push(
@@ -116,10 +117,8 @@ const battles = (player) => getBattleHistory(player)
                 ...monstersDetails,
                 ...info,
                 battle_queue_id: battle.battle_queue_id_1,
-                player_rating_initial: battle.player_1_rating_initial,
-                player_rating_final: battle.player_1_rating_final,
-                winner: battle.player_1,
-
+                //winner: battle.player_1,
+                //verdict: (winner && winner == battle.player_1)?'w':(winner == 'DRAW')? 'd' :'l',
               }
             } else if (battle.winner && battle.winner == battle.player_2) {
               const monstersDetails = extractMonster(details.team2)
@@ -128,9 +127,8 @@ const battles = (player) => getBattleHistory(player)
                 ...monstersDetails,
                 ...info,
                 battle_queue_id: battle.battle_queue_id_2,
-                player_rating_initial: battle.player_2_rating_initial,
-                player_rating_final: battle.player_2_rating_final,
-                winner: battle.player_2,
+                //winner: battle.player_2,
+                //verdict: (winner && winner == battle.player_2)?'w':(winner == 'DRAW')? 'd' :'l',
               }
             }
           }
@@ -141,28 +139,26 @@ const battles = (player) => getBattleHistory(player)
   }))
   .then(() => { return Promise.all(promises) })
   .then(() => { return new Promise((res,rej) => {
-	  misc.writeToLogNoUsername('Reading local battle history');
+	  misc.writeToLog('Reading local battle history');
     fs.readFile(`./data/newHistory.json`, 'utf8', (err, data) => {
       if (err) {
-        misc.writeToLogNoUsername(`Error reading file from disk: ${err}`); rej(err)
+        misc.writeToLog(`Error reading file from disk: ${err}`); rej(err)
       } else {
         battlesList = data ? [...battlesList, ...JSON.parse(data)] : battlesList;
       }
-      battlesList = uniqueListByKey(battlesList.filter(x => x != undefined), "battle_queue_id")
-      misc.writeToLogNoUsername('Adding data to battle history....');
-      misc.writeToLogNoUsername(chalk.yellow(battlesList.length))
+      battlesList = uniqueListByKey(battlesList.filter(x => x != undefined),"battle_queue_id")
+      misc.writeToLog('Adding data to battle history....');
+      misc.writeToLog(chalk.yellow(battlesList.length))
       fs.writeFile(`data/newHistory.json`, JSON.stringify(battlesList), function (err) {
         if (err) {
-          misc.writeToLogNoUsername(err,'a'); rej(err);
+          misc.writeToLog(err,'a'); rej(err);
         }
-        misc.writeToLogNoUsername(chalk.green('Success adding data.....'));
+        misc.writeToLog(chalk.green('Success adding data.....')); 
         battlesList = [],
         promises = []; 
-        min_rating = [];
       });
       res(battlesList)
     });
   }) })
 
-    
 module.exports.battlesList = battles;
