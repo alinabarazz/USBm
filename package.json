@@ -1,13 +1,13 @@
 {
-  "name": "ultimate-splinterlands-bot",
+  "name": "ultimate-splinterlands-bot-mobile",
   "version": "0.4.2",
-  "description": "A fast, free, multi-account splinderlands bot",
+  "description": "Mobile version of ultimate splinterlands bot",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
   },
-  "author": "PC Jones",
+  "author": "virgaux",
   "license": "GPL-3.0",
   "dependencies": {
     "chalk": "^4.1.2",
@@ -23,14 +23,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PCJones/ultimate-splinterlands-bot.git"
+    "url": "git+https://github.com/virgaux/ultimate-splinterlands-bot-mobile.git"
   },
   "keywords": [
     "bot",
     "splinterlands"
   ],
   "bugs": {
-    "url": "https://github.com/PCJones/ultimate-splinterlands-bot/issues"
+    "url": "https://github.com/virgaux/ultimate-splinterlands-bot-mobile/issues"
   },
-  "homepage": "https://github.com/PCJones/ultimate-splinterlands-bot#readme"
+  "homepage": "https://github.com/virgaux/ultimate-splinterlands-bot-mobile#readme",
+  "devDependencies": {}
 }
