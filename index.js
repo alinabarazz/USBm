@@ -176,10 +176,10 @@ async function createBrowsers(count, headless) {
                 product: 'chrome',
                 headless: headless,
                 args: process.env.CHROME_NO_SANDBOX === 'true' ? ["--no-sandbox"] : [
-                    '--incognito',
-                    '--disable-web-security',
-                    '--disable-features=IsolateOrigins',
-                    '--disable-site-isolation-trials'
+                    //'--incognito',
+                    //'--disable-web-security',
+                    //'--disable-features=IsolateOrigins',
+                    //'--disable-site-isolation-trials'
                 ],
             });
         const page = await browser.newPage();
@@ -260,7 +260,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
     } else {
         misc.writeToLog('Playing only basic cards')
     }
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61  Safari/537.36');
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100  Safari/537.36');
     await page.setViewport({
         width: 1800,
         height: 1500,
