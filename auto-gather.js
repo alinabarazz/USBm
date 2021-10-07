@@ -102,7 +102,7 @@ const battles = async (player) =>  getBattleHistory(player)
       //? min_rating.push(x.player_1_rating_final)
       //: min_rating.push(x.player_2_rating_final);
     return [x.player_1, x.player_2] 
-  }).flat().filter(distinct))
+  }).concat().filter(distinct))
   .then(ul => ul.map(user => {
     promises.push(
       getBattleHistory(user)
