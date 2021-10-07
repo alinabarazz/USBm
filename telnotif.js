@@ -36,7 +36,7 @@ async function battlesummary(logSummary,tet,sleepingTime){
             for (let i = 0; i < amount_sliced; i++) {
                 message = messageString.slice(start, end) 
                 bot.sendMessage(process.env.TELEGRAM_CHATID, message);
-                await sleep(8000);
+                await sleep(12000);
                 start = start + max_size
                 end = end + max_size
             }
@@ -92,7 +92,7 @@ bot.on(['/battledata', '/clearbattledata'], (msg) => {
                         for (let i = 0; i < amount_sliced; i++) {
                             message = messageString.slice(start, end) 
                             bot.sendMessage(msg.from.id, message);
-                            sleep(8000);
+                            sleep(12000);
                             start = start + max_size
                             end = end + max_size
                         }
