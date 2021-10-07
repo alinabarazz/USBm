@@ -1,5 +1,5 @@
 @echo off
-ECHO Bot modified by virgaux(based on bot by PC jones) - have fun
+ECHO Bot modified by virgaux based on bot by PC jones - have fun
 ECHO Press any key to start the installation
 PAUSE
 call npm install
