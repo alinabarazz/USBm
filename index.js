@@ -283,7 +283,14 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
         });
     }
     await waitUntilLoaded(page);
-    let erc = parseInt((await getElementTextByXpath(page, "//div[@class='dec-options'][1]/div[@class='value'][2]/div", 1000)).split('%')[0]);
+
+    try {
+        erc = parseInt((await getElementTextByXpath(page, "//div[@class='dec-options'][1]/div[@class='value'][2]/div", 1000)).split('%')[0]);
+    } catch {
+        await page.goto('https://splinterlands.com/?p=battle_history');
+        erc = parseInt((await getElementTextByXpath(page, "//div[@class='dec-options'][1]/div[@class='value'][2]/div", 1000)).split('%')[0]);
+    }
+
     if (erc >= 50) {
         misc.writeToLog('Current Energy Capture Rate is ' + chalk.green(erc + "%"));
   
@@ -442,7 +449,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
     let teamToPlay;
     misc.writeToLog(chalk.green('Battle details:'));  
     misc.writeToLog('Mana:'+  chalk.yellow(mana) + ' Rules:' + chalk.yellow(rules) + ' Splinters:' + chalk.yellow(splinters))
-    battledata.push(' Mana: '+  chalk.yellow(mana) + '\n Rules: ' + chalk.yellow(rules) + '\n Splinters: ' + chalk.yellow(splinters))
+    battledata.push(' Mana: '+  mana + '\n Rules: ' + rules + '\n Splinters: ' + splinters)
     misc.writeToLog(chalk.green('starting team selection'));
     if (useAPI) {
        try {
@@ -458,6 +465,8 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                 apiSelect = true;
                 console.log(chalk.cyan('Team picked by API: ' + JSON.stringify(teamToPlay)));
                 battledata.push(' API was used for this battle.')
+                battledata.push(' Element used: ' + Object.values(apiResponse)[15].toString())
+
                 // TEMP, testing
                 if (Object.values(apiResponse)[1] == '') {
                     misc.writeToLog('Seems like the API found no possible team - using local history');
@@ -535,14 +544,14 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
         }
         await page.waitForTimeout(10000);
         misc.writeToLog('Summoner: ' + chalk.yellow(teamToPlay.summoner.toString().padStart(3)) + ' Name: ' + chalk.green(allCardDetails[(parseInt(teamToPlay.summoner))-1].name.toString()));
-        battledata.push(' Summoner: ' + chalk.yellow(teamToPlay.summoner.toString().padStart(3)) + ' Name: ' + chalk.green(allCardDetails[(parseInt(teamToPlay.summoner))-1].name.toString()))
+        battledata.push(' Summoner: ' + teamToPlay.summoner.toString().padStart(3) + ' Name: ' + allCardDetails[(parseInt(teamToPlay.summoner))-1].name.toString())
                 for (i = 1; i <= 6; i++) {
                     await sleep(300);
                     let strCard = 'nocard';
                     if(teamToPlay.cards[i] != ''){ strCard = allCardDetails[(parseInt(teamToPlay.cards[i]))-1].name.toString(); }
                       if(strCard !== 'nocard'){
                         misc.writeToLog('Play: ' + chalk.yellow(teamToPlay.cards[i].toString().padStart(3)) + ' Name: ' + chalk.green(strCard));
-                        battledata.push(' Play: ' + chalk.yellow(teamToPlay.cards[i].toString().padStart(3)) + ' Name: ' + chalk.green(strCard) )
+                        battledata.push(' Play: ' + teamToPlay.cards[i].toString().padStart(3) + ' Name: ' + strCard)
                       } else {
                         misc.writeToLog(' ' + strCard);
                       }  
@@ -580,8 +589,8 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
             const draw = await getElementText(page, '.battle-log-entry .battle-log-entry__vs .conflict__title', 15000);
             if (winner.trim() == process.env.ACCUSERNAME.trim()) {
                 const decWon = await getElementText(page, '.battle-log-entry .battle-log-entry__vs.win  .conflict__dec', 1000);
-                misc.writeToLog(chalk.green('You won! Reward: ' + decWon + ' DEC'));
-				logSummary.push(' Battle result:' + chalk.green(' Win Reward: ' + decWon + ' DEC'));
+                misc.writeToLog(chalk.green('You won! Reward: ' + decWon));
+				logSummary.push(' Battle result:' + chalk.green(' Win Reward: ' + decWon));
                 battledata.push(' Battle result: Won');
             } else if (draw.trim() == "Draw") {
                 misc.writeToLog(chalk.yellow("It's a draw"));
@@ -597,8 +606,8 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
             }
             if (getDataLocal == true) {
                 misc.writeToLog("Gathering winner's battle data for local history backup") 
-                await battles.battlesList(process.env.ACCUSERNAME).then(x=>x)
-            }    
+                await battles.battlesList(process.env.ACCUSERNAME).then(x=>x).catch(() => misc.writeToLog('Unable to gather data for local.'));  
+            }  
         } catch (e) {
                 misc.writeToLog(e);
                 misc.writeToLog(chalk.blueBright('Could not find winner'));
@@ -682,11 +691,15 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
         envStatus.push('Use API: ' + useAPI);
         envStatus.push('Accounts: ' + chalk.greenBright(accounts));
 
-        if (process.env.TELEGRAM_NOTIF === 'true') { await tn.tbotResponse(envStatus)};
+        if (process.env.TELEGRAM_NOTIF === 'true') { 
+            await tn.tbotResponse(envStatus)
+            await tn.accountsdata(accountusers)
+        };
 
         while (true) {
             let logSummary = [];
             let battledata = [];
+            battledata.push(' \n' + 'Battle time: ' + new Date().toLocaleString());
 			startTimer = new Date().getTime();
 			if (process.env.TELEGRAM_NOTIF === 'true'){ await tn.sender(' Bot Initiated: Battle now starting.' + ' \n' + ' Please wait for the battle results.')};
             for (let i = 0; i < accounts.length; i++) {
@@ -738,6 +751,8 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
                     //browsers[0].process().kill('SIGKILL');
                 }
             }
+            misc.writeToLog('Generating battle result... ')
+            await sleep(5000);
             let endTimer = new Date().getTime();
 			let totalTime = endTimer - startTimer;
 			let tet = ' Total execution time: ' + chalk.green((totalTime / 1000 / 60).toFixed(2) + ' mins')
@@ -747,17 +762,30 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
 				logSummary.forEach(x => console.log(x));
 			}
 			// telegram notification 
-			if (process.env.TELEGRAM_NOTIF === 'true') {
-            
-                new fs.writeFile('data/BattleHistoryData.json', JSON.stringify(battledata), err => {
-                    if (err) {
-                        console.log('Error writing file', err)
-                    } else {
-                        console.log('Successfully wrote file')
-                        battledata = [];
-                    }
-                })
 
+			if (process.env.TELEGRAM_NOTIF === 'true') {
+                if (fs.existsSync('./data/BattleHistoryData.json')) {
+                    fs.readFile(`./data/BattleHistoryData.json`, 'utf8',function (err, data) {
+                        if (err) {
+                          misc.writeToLogNoUsername(`Error reading saved battle history: ${err}`); rej(err)
+                        } else {
+                            battledata = data ? [...battledata, ...JSON.parse(data)] : battledata;
+                            fs.writeFile(`./data/BattleHistoryData.json`, JSON.stringify(battledata), function (err) {
+                                if (err) {
+                                misc.writeToLogNoUsername(err,'Error saving battle history file'); rej(err);
+                               }})
+                       }
+                    })        
+                } else {
+                    fs.writeFile('data/BattleHistoryData.json', JSON.stringify(battledata), err => {
+                        if (err) {
+                            misc.writeToLogNoUsername('Error saving battle history file', err)
+                        } else {
+                            misc.writeToLogNoUsername('Successfully saving battle history')
+                            battledata = [];
+                        }
+                    })
+                }    
 				tn.battlesummary(logSummary,tet,sleepingTime)
 			}
 
