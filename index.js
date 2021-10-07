@@ -752,7 +752,6 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
                 }
             }
             misc.writeToLog('Generating battle result... ')
-            await sleep(5000);
             let endTimer = new Date().getTime();
 			let totalTime = endTimer - startTimer;
 			let tet = ' Total execution time: ' + chalk.green((totalTime / 1000 / 60).toFixed(2) + ' mins')
@@ -788,7 +787,7 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
                 }    
 				tn.battlesummary(logSummary,tet,sleepingTime)
 			}
-
+            await sleep(8000)
             console.log('----------------------------------------------------------------------');
             console.log('Waiting for the next battle in', sleepingTime / 1000 / 60, ' minutes at ', new Date(Date.now() + sleepingTime).toLocaleString());
             console.log(chalk.green('Interested in a bot that transfers all cards, dec and sps to your main account? Visit the discord or telegram!'));

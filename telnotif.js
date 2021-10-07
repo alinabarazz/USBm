@@ -18,7 +18,7 @@ bot.start();
 async function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-function battlesummary(logSummary,tet,sleepingTime){
+async function battlesummary(logSummary,tet,sleepingTime){
     try {
             message = 'Battle result summary: \n' + " " + new Date().toLocaleString() + ' \n' + tet.replace(/\u001b[^m]*?m/g,"") + ' \n';
             for (let i = 0; i < logSummary.length; i++) {
@@ -28,7 +28,18 @@ function battlesummary(logSummary,tet,sleepingTime){
 
             message = message + ' \n' + 'To see battle history, type /battledata' + ' \n'
             message = message + ' \n' + 'Discord https://discord.gg/hwSr7KNGs9'
-            bot.sendMessage(process.env.TELEGRAM_CHATID, message);
+            const max_size = 4096
+            var messageString = message
+            var amount_sliced = messageString.length / max_size
+            var start = 0
+            var end = max_size
+            for (let i = 0; i < amount_sliced; i++) {
+                message = messageString.slice(start, end) 
+                bot.sendMessage(process.env.TELEGRAM_CHATID, message);
+                await sleep(8000);
+                start = start + max_size
+                end = end + max_size
+            }
             //notify.send(message);
             console.log(chalk.green(' \n' + ' Battle result sent to telegram'));
 
@@ -227,8 +238,8 @@ bot.on(['/questreward'], (msg) => {
             try{
                     const generalResult = Object.values(JSON.parse(Object.values(data1)[11]).rewards) // general result
                     let detailer1 = [];
-                    let timer = moment((Object.values(data1)[10].split('T')[1]).split('.')[0],["HH.mm"]).format("hh:mm a"); 
-                    let dater = moment(Object.values(data1)[10].split('T')[0]).format('MM-DD-YYYY');
+                    let timer = moment.utc((Object.values(data1)[10].split('T')[1]).split('.')[0],["HH.mm"]).local().format("hh:mm a"); 
+                    let dater = moment.utc(Object.values(data1)[10].split('T')[0]).local().format('MM-DD-YYYY');
                     let message1 = ' ' + namer[j] + ' \n' +' Received at ' + dater + ' ' +  timer + ' \n'
                     for (let i = 0; i < generalResult.length; i++) {
                         rewardcard = Object.values(generalResult[i])[0]
