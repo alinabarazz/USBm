@@ -35,8 +35,7 @@ async function battlesummary(logSummary,tet,sleepingTime){
             var end = max_size
             for (let i = 0; i < amount_sliced; i++) {
                 message = messageString.slice(start, end) 
-                bot.sendMessage(process.env.TELEGRAM_CHATID, message);
-                await sleep(12000);
+                await bot.sendMessage(process.env.TELEGRAM_CHATID, message);
                 start = start + max_size
                 end = end + max_size
             }
@@ -67,10 +66,11 @@ bot.on(['/start'], (msg) => {
 });
 
 bot.on(['/battledata', '/clearbattledata'], (msg) => {  
+
     
     const command = msg.text
     if (fs.existsSync('./data/BattleHistoryData.json')) {
-        fs.readFile('./data/BattleHistoryData.json', 'utf8', function (err, rawStoredData) {
+        fs.readFile('./data/BattleHistoryData.json', 'utf8', async (err, rawStoredData) => {
             if (err) {
                 misc.writeToLogNoUsername(`Error reading saved battle history: ${err}`); rej(err);
             } else {
@@ -91,10 +91,10 @@ bot.on(['/battledata', '/clearbattledata'], (msg) => {
                         var end = max_size
                         for (let i = 0; i < amount_sliced; i++) {
                             message = messageString.slice(start, end) 
-                            bot.sendMessage(msg.from.id, message);
-                            sleep(12000);
+                            await bot.sendMessage(msg.from.id, message)
                             start = start + max_size
                             end = end + max_size
+                            //sleep(30000);
                         }
                         message = '';
                     }

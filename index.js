@@ -812,19 +812,23 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
 
 			if (process.env.TELEGRAM_NOTIF === 'true') {
                 if (fs.existsSync('./data/BattleHistoryData.json')) {
-                    fs.readFile(`./data/BattleHistoryData.json`, 'utf8',function (err, data) {
+                    fs.readFile(`./data/BattleHistoryData.json`, 'utf8', async (err, data) => {
                         if (err) {
                           misc.writeToLogNoUsername(`Error reading saved battle history: ${err}`); rej(err)
                         } else {
                             battledata = data ? [...battledata, ...JSON.parse(data)] : battledata;
-                            fs.writeFile(`./data/BattleHistoryData.json`, JSON.stringify(battledata), function (err) {
+                            fs.writeFile(`./data/BattleHistoryData.json`, JSON.stringify(battledata), async (err) => {
                                 if (err) {
                                 misc.writeToLogNoUsername(err,'Error saving battle history file'); rej(err);
-                               }})
+                            } else {
+                                misc.writeToLogNoUsername('Successfully saving battle history')
+                                battledata = [];
+                            }
+                            })
                        }
                     })        
                 } else {
-                    fs.writeFile('data/BattleHistoryData.json', JSON.stringify(battledata), err => {
+                    fs.writeFile('data/BattleHistoryData.json', JSON.stringify(battledata), async err => {
                         if (err) {
                             misc.writeToLogNoUsername('Error saving battle history file', err)
                         } else {
