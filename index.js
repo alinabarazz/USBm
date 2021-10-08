@@ -818,14 +818,10 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
                         } else {
                             battledata = data ? [...battledata, ...JSON.parse(data)] : battledata;
                             fs.writeFile(`./data/BattleHistoryData.json`, JSON.stringify(battledata), async (err) => {
-                                if (err) {
-                                misc.writeToLogNoUsername(err,'Error saving battle history file'); rej(err);
-                            } else {
-                                misc.writeToLogNoUsername('Successfully saving battle history')
-                                battledata = [];
-                            }
+                                if (err) { misc.writeToLogNoUsername(err,'Error saving battle history file'); rej(err);}    
                             })
-                       }
+                            battledata = [];
+                        }
                     })        
                 } else {
                     fs.writeFile('data/BattleHistoryData.json', JSON.stringify(battledata), async err => {

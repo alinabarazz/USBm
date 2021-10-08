@@ -1,12 +1,12 @@
-# Ultimate Splinterlands Bot V1 by PC Jones
+# Ultimate Splinterlands Bot V1 Mobile by Virgaux
 A fast, free, multi-account splinderlands bot
 
-Based on https://github.com/alfficcadenti/splinterlands-bot
+Based on https://github.com/PCJones/ultimate-splinterlands-bot
 
 ## Preamble 
-Right now the code is a mess - I just hacked something together so I can release this asap. I'm planning on updating the code soon. 
+Not really good at coding so please don't mind how I code this bot. 
 
-Feel free to give suggestions for features/code refurbishing via github or on discord/telegram.
+Feel free to give suggestions for features/code refurbishing via github or on discord.
 
 
 ## New Features
@@ -17,37 +17,73 @@ Feel free to give suggestions for features/code refurbishing via github or on di
 - The bot no longer refreshes the page all the time (which often got you blocked from splinterlands for a few minutes)
 - The bot clicks away popups
 - The bot waits if there is a loading circle from splinterlands
-- Disabled requesting the free API because it is always overloaded and slows down the bot (I've supplied a very large history file)
 - Option to disable automatic quest reward chest opening
 - Support for the private API of the original bot
 - Minimum Energy Capture Rate - the bot will pause automatically if the energy capture rate is below a specified percentage
 - New battle log summary after all battles
 - New DEC log after battle. 
 - Receive Battle log summary notification via Telegram 
-- Sleep function for ERC regeneration (virgaux)
-- **Updated Feature**: Accurate battle summary (virgaux)
-- **Coming Soon**: Telegram notification if bot had an error/stop running. Call to function on telegram. (virgaux)
-- **Coming Soon**: Individual wait time for each account (right now it will battle with all accounts and wait after that) (aka **Multithreading**)
-- **Coming Soon**: Statistics on how each account is performing
+- Accurate battle summary 
+- Auto gather the battle history for local back.(In case supported API is down)
+- Telegram notification if bot had an error/stop running. Call to function on telegram. (virgaux)
+- **Coming Soon**: More Telegram command
 - Any suggestions?
 
 # Support / Community
 
-[Discord](
-https://discord.gg/hwSr7KNGs9)
-
-[Telegram](https://t.me/ultimatesplinterlandsbot) 
+[Discord](https://discord.gg/s9HKjqYW)
 
 ## How to install
-- Download and install [NodeJs](https://nodejs.org/it/download/)
-- Download the [bot](https://github.com/PCJones/ultimate-splinterlands-bot/archive/refs/heads/master.zip) (extract if its .zip)
-- Create .env file (see .env-example)
-- On windows: Execute `install.bat` in bot folder
-- On MacOS/Linux: open terminal in bot folder and execute command `npm install` and `npm install --save telegram-notify`
+- Download [Termux] (https://f-droid.org/packages/com.termux/)
+Open Termux then type 
+pkg update -y
+press enter/next 2x
+pkg install proot-distro (Choose which distro you want to use but recommened to to use Alpine)
+after installation, type proot-distro login (Name of the distro you choosed)
+
+or 
+
+- Install [AndroNix](https://andronix.app/) and choose which distro you will use. (Recommended to use Alpine)
+    Follow instruction [here] (https://www.youtube.com/watch?v=XkL1B0arrbw) to use VNSC 
+                or 
+    Using terminal only: 
+    Copy link from AndroNix for terminal only. Paste in Termux the copied linked. 
+    Paste in Termux the copied linked.
+    After installation, type  bash start-alpine.sh
+    (Try to google steps on how to log in on your preferred distro)           
+
+- 2nd step (Install chromium)
+Copy and paste this:
+  apk update && apk add --no-cache nmap && \
+  echo @edge http://nl.alpinelinux.org/alpine/edge/community >> /etc/apk/repositories && \
+  echo @edge http://nl.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories && \
+  apk update && \
+  apk add --no-cache \
+  chromium
+
+- 3rd step: 
+Type: apk add nodejs npm git
+
+- 4th step 
+Type: git clone https://github.com/virgaux/ultimate-splinterlands-bot-mobile
+
+- 5th step 
+Type cd ultimate-splinterlands-bot
+Install nano by typing apk add nano 
+Fill nano .env-example
+
+ - 6th step
+Edit the data inside the .env-example
+After editing, press ctrl x, press y, remove "-example" then enter
+
+7th step 
+Type sh install.bat 
 
 ## How to start the bot
-- On windows: Execute `start.bat` in bot folder
-- On MacOS/Linux: open terminal in bot folder and execute command `npm start`
+- You can type either of the following: sh start.bat , npm start or node index.js
+
+## How to get telegram token
+- Follow the instruction on [how to get telegram token](https://www.siteguarding.com/en/how-to-get-telegram-bot-api-token)
 
 ## Bot configuration:
 
@@ -55,13 +91,13 @@ Configuration with default values:
 
 - `QUEST_PRIORITY=true` Disable/Enable quest priority
 
-- `MINUTES_BATTLES_INTERVAL=30` Sleep time before the bot will fight with all accounts again. Subtract 2-3 minutes per account
+- `MINUTES_BATTLES_INTERVAL=` Sleep time before the bot will fight with all accounts again. Subtract 2-3 minutes per account
 
-- `ERC_THRESHOLD=80` If your energy capture rate goes below this the bot will stop fighting with this account until it's above again. Set to 0 to disable 
+- `ERC_THRESHOLD=` If your energy capture rate goes below this the bot will stop fighting with this account until it's above again. Set to 0 to disable 
+
+- `POWER_THRESHOLD=` Able to see the current collection power. It will let you know if your collection power is below theshold. 
   
 - `ERC_REGEN=true` Disable/Enable ERC regeneration function.
-
-- `ERC_REGEN_LIMIT=100` If your energy capture rate is not yet above this, the bot will not fight with this account until it's reach the pre-set parameter.
 
 - `CLAIM_SEASON_REWARD=false` Disable/Enable season reward claiming
 
@@ -70,6 +106,8 @@ Configuration with default values:
 - `HEADLESS=true` Disable/Enable headless("invisible") browser (e.g. to see where the bot fails)
 
 - `KEEP_BROWSER_OPEN=true` Disable/Enable keeping the browser instances open after fighting. Recommended to have it on true to avoid having each account to login for each fight. Disable if CPU/Ram usage is too high (check in task manager)
+
+- `CHROME_NO_SANDBOX=true` Don't change to false as you will not able to run the bot on a linux proot-distro. 
 
 - `LOGIN_VIA_EMAIL=false` Disable/Enable login via e-mail adress. See below for further explanation
 
@@ -87,7 +125,7 @@ Configuration with default values:
 
 - `TELEGRAM_NOTIF=false` Disable/Enable to receive telegram notification for battle result. 
 
-- `TELEGRAM_TOKEN=` Ignore/Don't change unless you have other Telegram Token/Telegram Bot. 
+- `TELEGRAM_TOKEN=` API TOKEN from telegram which will send you the notification. This is private key. DO NOT GIVE IT TO ANYONE. [how to get telegram token](https://www.siteguarding.com/en/how-to-get-telegram-bot-api-token)
 
 - `TELEGRAM_CHATID` telegram chat id for notify, get the id: https://t.me/get_id_bot
 
@@ -95,11 +133,9 @@ Configuration with default values:
 
 In case you want to donate to me for updating this bot, I would be very happy! Please also consider donating to the original bot creator.
 
-- DEC into the game to the player **virgaux** 
-- Bitcoin 3KU85k1HFTqCC4geQz3XUFk84R6uekuzD8 ()
-- Ethereum 0xcFE8c78F07e0190EBdD9077cF9d9E3A8DCED8d91 
-- WAX to account **lshru.wam** (please copy the name)
-- Text me on Discord or Telegram for anything other
+- DEC or cards into the game to the player **virgaux** 
+- Metamask wallet address: 0x6b11890566077AAC2B7fA7511d484f50Ec1335f6
+- Hive wallet address: @virgaux
 
 # FAQ
 **Can I have some accounts that login via email and some via username?**
@@ -125,5 +161,5 @@ PASSWORD=password1,password2,POST_KEY3
 
 **Why I can't see the Telegram notification after setting it up?**
 
-1. Look for `@Battle_Result_Bot` or the for the name of your bot in Telegram. 
+1. Look for the name of your bot in Telegram. 
 2. Type `/start` to receive notifcation once battle summary result is available. 
