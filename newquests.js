@@ -87,7 +87,6 @@ async function newquestUpdate (Newquest, claimQuestReward, page, logSummary, all
             } 
         }
     } catch (e) {
-        misc.writeToLog(e)
         misc.writeToLog('Updated Quest Details:' + coloredElement  + " Quest: " + Object.values(Newquest)[3].toString() + "/" + Object.values(Newquest)[2].toString());
         logSummary.push(" " + coloredElement  + " Quest: " + chalk.yellow(Object.values(Newquest)[3].toString() + "/" + Object.values(Newquest)[2].toString()) + chalk.red(' No quest reward...'));
     }
