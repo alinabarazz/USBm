@@ -16,7 +16,7 @@ echo.
 echo "Want to start the bot now?"
 select yn in "Yes" "No"; do
     case $yn in
-        Yes ) call node --max-old-space-size=8192 index.js;;
+        Yes ) sh start.sh
         No ) exit;;
     esac
 done
