@@ -77,7 +77,7 @@ Edit the data inside the .env-example
 After editing, press ctrl x, press y, remove "-example" then enter
 
 7th step 
-Type sh install.bat 
+Type npm install
 
 ## How to start the bot
 - You can type either of the following: sh start.bat , npm start or node index.js
