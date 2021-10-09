@@ -63,7 +63,7 @@ const summonerColor = (id) => {
     return summonerDetails ? summonerDetails[id] : '';
 }
 
-const historyBackup = require("./data/newHistory2.json");
+const historyBackup = require("./data/newHistory.json");
 const basicCards = require('./data/basicCards.js');
 const { filter } = require('./data/basicCards.js');
 
