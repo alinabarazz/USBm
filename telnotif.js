@@ -18,16 +18,15 @@ bot.start();
 async function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-async function battlesummary(logSummary,tet,sleepingTime){
+async function battlesummary(logSummary,tet,sleepingTime,battletTime,battleID){
     try {
-            message = 'Battle result summary: \n' + " " + new Date().toLocaleString() + ' \n' + tet.replace(/\u001b[^m]*?m/g,"") + ' \n';
+            message = 'Battle result summary: \n' + " " + battletTime + ' \n' + tet.replace(/\u001b[^m]*?m/g,"") + ' \n';
             for (let i = 0; i < logSummary.length; i++) {
                 message = message + logSummary[i].replace(/\u001b[^m]*?m/g,"") +' \n';
             }
             message = message + ' \n' + ' Next battle in '+ sleepingTime / 1000 / 60 + ' minutes at ' + new Date(Date.now() +sleepingTime).toLocaleString() + ' \n';
-
-            message = message + ' \n' + 'To see battle history, type /battledata' + ' \n'
-            message = message + ' \n' + 'Discord https://discord.gg/hwSr7KNGs9'
+            message = message + ' \n' + ' To see battle log, type /battledata' + battleID +' \n'
+            message = message + ' \n' + 'Discord https://discord.gg/s9HKjqYW'
             const max_size = 4096
             var messageString = message
             var amount_sliced = messageString.length / max_size
@@ -65,10 +64,9 @@ bot.on(['/start'], (msg) => {
       bot.sendMessage(msg.from.id, message);
 });
 
-bot.on(['/battledata', '/clearbattledata'], (msg) => {  
-
-    
-    const command = msg.text
+bot.on([/^\/battledata(.+)$/, '/clearbattledata'], (msg) => {  
+    const command = msg.text.split("ID")[0]
+    const battleId =  msg.text.split("ID")[1]
     if (fs.existsSync('./data/BattleHistoryData.json')) {
         fs.readFile('./data/BattleHistoryData.json', 'utf8', async (err, rawStoredData) => {
             if (err) {
@@ -79,9 +77,13 @@ bot.on(['/battledata', '/clearbattledata'], (msg) => {
                     if (storedData == "") {
                         bot.sendMessage(msg.from.id, 'No battle data yet.');
                     } else {
-                        let message = 'Battle Data summary: \n';
-                        for (let i = 0; i < storedData.length; i++) {
-                            message = message + storedData[i] + ' \n';
+                        const data2 = storedData.find(img => img.battleID === battleId);
+                        let message = 'Battle log summary: \n' +  '\n';
+                        message = message + "Battle ID: " + Object.values(data2)[0] +  '\n'
+                        message = message + "Battle Time: " + Object.values(data2)[1]
+                        let battlelogs = JSON.parse(Object.values(data2)[2].toString())
+                        for (let i = 0; i < battlelogs.length; i++) {
+                            message = message + battlelogs[i] + ' \n';
                         }
                         message = message + ' \n' + ' Please see full battle details in log.';
                         const max_size = 4096
@@ -89,12 +91,15 @@ bot.on(['/battledata', '/clearbattledata'], (msg) => {
                         var amount_sliced = messageString.length / max_size
                         var start = 0
                         var end = max_size
-                        for (let i = 0; i < amount_sliced; i++) {
-                            message = messageString.slice(start, end) 
+                        if (amount_sliced>1) {
+                            for (let i = 0; i < amount_sliced; i++) {
+                                message = messageString.slice(start, end) 
+                                await bot.sendMessage(msg.from.id, message)
+                                start = start + max_size
+                                end = end + max_size
+                            }
+                        } else {
                             await bot.sendMessage(msg.from.id, message)
-                            start = start + max_size
-                            end = end + max_size
-                            //sleep(30000);
                         }
                         message = '';
                     }

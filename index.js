@@ -211,8 +211,8 @@ async function createBrowsers(count, headless) {
                 product: 'chrome',
                 headless: headless,
                 args: process.env.CHROME_NO_SANDBOX === 'true' ? ["--no-sandbox"] : [
-                    //'--incognito',
-                    //'--disable-web-security',
+                    '--incognito',
+                    '--disable-web-security',
                     //'--disable-features=IsolateOrigins',
                     //'--disable-site-isolation-trials'
                 ],
@@ -288,8 +288,8 @@ async function selectCorrectBattleType(page) {
 async function startBotPlayMatch(page, myCards, quest, claimQuestReward, prioritizeQuest, useAPI, logSummary, getDataLocal, battledata) {
     const ercThreshold = process.env.ERC_THRESHOLD;
     const allCardDetails = await readJSONFile(fnAllCardsDetails);
-    logSummary.push(' \n' + ' -----' + process.env.ACCUSERNAME + '-----')
-    battledata.push(' \n' + ' -----' + process.env.ACCUSERNAME + '-----')
+    logSummary.push(' \n -----' + process.env.ACCUSERNAME + '-----')
+    battledata.push(' \n -----' + process.env.ACCUSERNAME + '-----')
     if (myCards) {
         misc.writeToLog('Deck size: ' + myCards.length)
     } else {
@@ -302,7 +302,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
         deviceScaleFactor: 1,
     });
 
-    await page.goto('https://splinterlands.io');
+    await page.goto('https://splinterlands.com/?p=battle_history');
     await page.waitForTimeout(4000);
 
     let username = await getElementText(page, '.dropdown-toggle .bio__name__display', 10000);
@@ -334,6 +334,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
     if (erc < ercThreshold) {
         misc.writeToLog('ERC is below threshold of ' + chalk.red(ercThreshold + '% ') + '- Skipping this account');
         logSummary.push(' Account skipped: ' + chalk.red('ERC is below threshold of ' + ercThreshold))
+        battledata.push(' Account skipped: ERC is below threshold of ' + ercThreshold)
         return;
     }
 
@@ -501,7 +502,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
     misc.writeToLog(chalk.green('starting team selection'));
     if (useAPI) {
        try {
-            const apiResponse = await withTimeout(90000, api.getPossibleTeams(matchDetails));
+            const apiResponse = await withTimeout(100000, api.getPossibleTeams(matchDetails));
             if (apiResponse && !JSON.stringify(apiResponse).includes('api limit reached')) {
                 misc.writeToLog(chalk.magenta('API Response Result: ')); 
                 console.log(apiResponse) 
@@ -745,9 +746,12 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
         };
 
         while (true) {
+            let dataCollected = [];
             let logSummary = [];
             let battledata = [];
-            battledata.push(' \n' + 'Battle time: ' + new Date().toLocaleString());
+            var idToken = (Math.random() + 1).toString(36).substring(2)
+            var battleID = 'ID' + idToken;
+            var battletTime = new Date().toLocaleString()
 			startTimer = new Date().getTime();
 			if (process.env.TELEGRAM_NOTIF === 'true'){tn.sender(' Bot Initiated: Battle now starting.' + ' \n' + ' Please wait for the battle results.')};
             for (let i = 0; i < accounts.length; i++) {
@@ -800,6 +804,13 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
                 }
             }
             misc.writeToLog('Generating battle result... ')
+            battlelog = JSON.stringify(battledata)
+            let dataCollect = {
+                battleID : idToken,
+                battletTime : battletTime,
+                battledata : battlelog
+            } 
+            dataCollected.push(dataCollect)
             let endTimer = new Date().getTime();
 			let totalTime = endTimer - startTimer;
 			let tet = ' Total execution time: ' + chalk.green((totalTime / 1000 / 60).toFixed(2) + ' mins')
@@ -816,30 +827,35 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
                         if (err) {
                           misc.writeToLogNoUsername(`Error reading saved battle history: ${err}`); rej(err)
                         } else {
-                            battledata = data ? [...battledata, ...JSON.parse(data)] : battledata;
-                            fs.writeFile(`./data/BattleHistoryData.json`, JSON.stringify(battledata), async (err) => {
+                            dataCollected = data ? [...dataCollected, ...JSON.parse(data)] : dataCollected;
+                            fs.writeFile(`./data/BattleHistoryData.json`, JSON.stringify(dataCollected), async (err) => {
                                 if (err) { misc.writeToLogNoUsername(err,'Error saving battle history file'); rej(err);}    
                             })
                             battledata = [];
+                            dataCollected= [];
+                            dataCollect ={};
                         }
                     })        
                 } else {
-                    fs.writeFile('data/BattleHistoryData.json', JSON.stringify(battledata), async err => {
+                    fs.writeFile('data/BattleHistoryData.json', JSON.stringify(dataCollected), async err => {
                         if (err) {
                             misc.writeToLogNoUsername('Error saving battle history file', err)
                         } else {
                             misc.writeToLogNoUsername('Successfully saving battle history')
                             battledata = [];
+                            dataCollected= [];
+                            dataCollect ={};
                         }
                     })
                 }    
-				await tn.battlesummary(logSummary,tet,sleepingTime)
+				await tn.battlesummary(logSummary,tet,sleepingTime,battletTime,battleID)
 			}
             console.log('----------------------------------------------------------------------');
             console.log('Waiting for the next battle in', sleepingTime / 1000 / 60, ' minutes at ', new Date(Date.now() + sleepingTime).toLocaleString());
             console.log(chalk.green('Interested in a bot that transfers all cards, dec and sps to your main account? Visit the discord or telegram!'));
             console.log(chalk.green('Join the telegram group https://t.me/ultimatesplinterlandsbot and discord https://discord.gg/hwSr7KNGs9'));
             console.log('--------------------------End of Battle--------------------------------');
+            battleID = ''
             await new Promise(r => setTimeout(r, sleepingTime));
             
         }
