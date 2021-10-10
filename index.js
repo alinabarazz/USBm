@@ -511,16 +511,34 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                     cards: [Object.values(apiResponse)[1], Object.values(apiResponse)[3], Object.values(apiResponse)[5], Object.values(apiResponse)[7], Object.values(apiResponse)[9],
                         Object.values(apiResponse)[11], Object.values(apiResponse)[13], Object.values(apiResponse)[15]]
                 };
-                apiSelect = true;
-                console.log(chalk.cyan('Team picked by API: ' + JSON.stringify(teamToPlay)));
-                battledata.push(' Battle data used: API')
-                battledata.push(' Element used: ' + Object.values(apiResponse)[15].toString())
-                // TEMP, testing
-                if (Object.values(apiResponse)[1] == '') {
-                    misc.writeToLog('Seems like the API found no possible team - using local history');
+                let subElement = helper.teamActualSplinterToPlay(splinters,teamToPlay.cards.slice(0, 6))
+                if (Object.values(apiResponse)[1]=== 'dragon' && splinters.includes(subElement) == false ) {
+
+                    misc.writeToLog('API choose inappropriate splinter sub-element. Reverting to local history.');
                     const possibleTeams = await ask.possibleTeams(matchDetails).catch(e => misc.writeToLog('Error from possible team API call: ', e));
-                    teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);  
-                }
+                    if (possibleTeams && possibleTeams.length) {
+                        //misc.writeToLog('Possible Teams based on your cards: ', possibleTeams.length, '\n', possibleTeams);
+                        misc.writeToLog('Possible Teams based on your cards: ', possibleTeams.length);
+                    } else {
+                        misc.writeToLog('Error: ', JSON.stringify(matchDetails), JSON.stringify(possibleTeams))
+                        throw new Error('NO TEAMS available to be played');
+                    }
+                    teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);
+                    battledata.push( ' Battle data used: Local history')
+                    useAPI = false;  
+
+                } else {
+                    apiSelect = true;
+                    console.log(chalk.cyan('Team picked by API: ' + JSON.stringify(teamToPlay)));
+                    battledata.push(' Battle data used: API')
+                    battledata.push(' Element used: ' + Object.values(apiResponse)[15].toString())
+                        // TEMP, testing
+                        if (Object.values(apiResponse)[1] == '') {
+                            misc.writeToLog('Seems like the API found no possible team - using local history');
+                            const possibleTeams = await ask.possibleTeams(matchDetails).catch(e => misc.writeToLog('Error from possible team API call: ', e));
+                            teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);  
+                        }
+                }   
             } else {
                 if (apiResponse && JSON.stringify(apiResponse).includes('api limit reached')) {
                     misc.writeToLog('API limit per hour reached, using local backup!');
