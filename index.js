@@ -513,7 +513,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                 };
                 apiSelect = true;
                 console.log(chalk.cyan('Team picked by API: ' + JSON.stringify(teamToPlay)));
-                battledata.push(' API was used for this battle.')
+                battledata.push(' Battle data used: API')
                 battledata.push(' Element used: ' + Object.values(apiResponse)[15].toString())
                 // TEMP, testing
                 if (Object.values(apiResponse)[1] == '') {
@@ -540,7 +540,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                     throw new Error('NO TEAMS available to be played');
                 }
                 teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);
-                battledata.push( 'Local History was used for this battle.')
+                battledata.push( ' Battle data used: Local history')
                 useAPI = false;
             }
         } catch (e){
@@ -554,7 +554,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                 throw new Error('NO TEAMS available to be played');
             }
             teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);
-            battledata.push( 'Local History was used for this battle.')
+            battledata.push( ' Battle data used: Local history')
             useAPI = false;
         }                  
     } else {
@@ -567,7 +567,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
             throw new Error('NO TEAMS available to be played');
         }
         teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);
-        battledata.push( 'Local History was used for this battle.')
+        battledata.push( ' Battle data used: Local history')
         useAPI = false;
     }
 

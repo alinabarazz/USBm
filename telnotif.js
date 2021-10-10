@@ -57,66 +57,89 @@ function sender (logMessage) {
 
    
 bot.on(['/start'], (msg) => {
+    message = 'Welcome to USBm! \n' + ' \n' + 
+              'This bot is still under development. If you encounter errors, please tell the dev of this bot about it so it can be fixed or not. To know the commands available, type /help . \n' + ' \n' + 'To support the dev from his creation, you can send some donation! (Apparently he is currently broke and needs your help XD). You can send DEC,SPS or cards to his account which is virgaux.  \n' + ' \n' + 'For crypto donations, you can send it to his wallet: \n' + ' \n' + 
+              'BTC: 3NkbuyYB1EkyrVJ3KLwEsWRaXG87xbiBmd   \n' +
+              'XRP: rU2mEJSLqBRkYLVTv55rFTgQajkLTnT6mA (tag: 643020)   \n' +
+              'HIVE: @virgaux  \n' + ' \n' + 'Have fun!!'     
+
+      bot.sendMessage(msg.from.id, message);
+});
+
+bot.on(['/help'], (msg) => {
     //console.log(msg);
-    message = ' /checkenv - to check current env setting. \n' +
-              ' /battledata - To see the battle details (battle rule, summoner, monster used) \n'  +
-              ' /clearbattledata - To clear currently stored battle data.  \n'       
+    message = 'List of commands: \n' + ' \n' +
+              ' /accounts - To show all account details.  \n' +
+              ' /checkenv - to check current env setting. \n' +
+              ' /battledataID - To see the battle logs (Must include battle ID). \n' +
+              ' /clearbattledata - To clear currently stored battle data.  \n' +
+              ' /questreward - To show all recent rewards claimed.  \n' 
+
       bot.sendMessage(msg.from.id, message);
 });
 
 bot.on([/^\/battledata(.+)$/, '/clearbattledata'], (msg) => {  
     const command = msg.text.split("ID")[0]
     const battleId =  msg.text.split("ID")[1]
-    if (fs.existsSync('./data/BattleHistoryData.json')) {
-        fs.readFile('./data/BattleHistoryData.json', 'utf8', async (err, rawStoredData) => {
-            if (err) {
-                misc.writeToLogNoUsername(`Error reading saved battle history: ${err}`); rej(err);
-            } else {
-                let storedData = JSON.parse(rawStoredData);
-                if (command === '/battledata') {
-                    if (storedData == "") {
-                        bot.sendMessage(msg.from.id, 'No battle data yet.');
-                    } else {
-                        const data2 = storedData.find(img => img.battleID === battleId);
-                        let message = 'Battle log summary: \n' +  '\n';
-                        message = message + "Battle ID: " + Object.values(data2)[0] +  '\n'
-                        message = message + "Battle Time: " + Object.values(data2)[1]
-                        let battlelogs = JSON.parse(Object.values(data2)[2].toString())
-                        for (let i = 0; i < battlelogs.length; i++) {
-                            message = message + battlelogs[i] + ' \n';
-                        }
-                        message = message + ' \n' + ' Please see full battle details in log.';
-                        const max_size = 4096
-                        var messageString = message
-                        var amount_sliced = messageString.length / max_size
-                        var start = 0
-                        var end = max_size
-                        if (amount_sliced>1) {
-                            for (let i = 0; i < amount_sliced; i++) {
-                                message = messageString.slice(start, end) 
-                                await bot.sendMessage(msg.from.id, message)
-                                start = start + max_size
-                                end = end + max_size
-                            }
-                        } else {
-                            await bot.sendMessage(msg.from.id, message)
-                        }
-                        message = '';
-                    }
-                } else if (command === '/clearbattledata') {
-                    fs.unlink('./data/BattleHistoryData.json', (err => {
-                        if (err)
-                            console.log(err), bot.sendMessage(msg.from.id, 'Error occured while deleting stored battle data. Please see log for details');
-                        else {
-                            bot.sendMessage(msg.from.id, 'Stored battle data cleared.');
-                        }
-                    }));
-                }
-            }
-        })
+    if (!battleId) {
+        bot.sendMessage(msg.from.id, "Please include the battle log ID.") 
     } else {
-        bot.sendMessage(msg.from.id, 'No Battle data stored.' );
-    }   
+        if (fs.existsSync('./data/BattleHistoryData.json')) {
+            fs.readFile('./data/BattleHistoryData.json', 'utf8', async (err, rawStoredData) => {
+                if (err) {
+                    misc.writeToLogNoUsername(`Error reading saved battle history: ${err}`); rej(err);
+                } else {
+                    const storedData = JSON.parse(rawStoredData);
+                    const CheckID = storedData.findIndex(img => img.battleID === battleId);
+                    if (command === '/battledata') {
+                        if (storedData == "") {
+                            bot.sendMessage(msg.from.id, 'No battle data yet.');
+                        } else {
+                            if (CheckID == -1) {
+                                await bot.sendMessage(msg.from.id, "Battle log can't be found in local storage.")
+                            } else {
+                                const data2 = storedData.find(img => img.battleID === battleId);
+                                let message = 'Battle log summary: \n' +  '\n';
+                                message = message + "Battle ID: " + Object.values(data2)[0] +  '\n'
+                                message = message + "Battle Time: " + Object.values(data2)[1] +  '\n'
+                                let battlelogs = JSON.parse(Object.values(data2)[2].toString())
+                                for (let i = 0; i < battlelogs.length; i++) {
+                                    message = message + battlelogs[i] + ' \n';
+                                }
+                                message = message + ' \n' + ' Please see full battle details in log.';
+                                const max_size = 4096
+                                var messageString = message
+                                var amount_sliced = messageString.length / max_size
+                                var start = 0
+                                var end = max_size
+                                if (amount_sliced>1) {
+                                    for (let i = 0; i < amount_sliced; i++) {
+                                        message = messageString.slice(start, end) 
+                                        await bot.sendMessage(msg.from.id, message)
+                                        start = start + max_size
+                                        end = end + max_size
+                                    }
+                                } else {
+                                    await bot.sendMessage(msg.from.id, message)
+                                }
+                                message = '';
+                            }
+                        }
+                    } else if (command === '/clearbattledata') {
+                        fs.unlink('./data/BattleHistoryData.json', (err => {
+                            if (err)
+                                console.log(err), bot.sendMessage(msg.from.id, 'Error occured while deleting stored battle data. Please see log for details');
+                            else {
+                                bot.sendMessage(msg.from.id, 'Stored battle data cleared.');
+                            }
+                        }));
+                    }
+                }
+            })
+        } else {
+            bot.sendMessage(msg.from.id, 'No Battle data stored.' );
+        }
+    }
 });  
 
 
@@ -131,83 +154,95 @@ async function tbotResponse(envStatus) {
 }
 
 async function accountsdata (accountusers) {
-bot.on(['/account'], (msg) => {
-    let player = msg.text.split(" ")[1]
-    if (!player) {
-        bot.sendMessage(msg.from.id, 'Please include an account name.');   
-    } else {
-    let myaccounts = accountusers.includes(player)
-    if (myaccounts == true) {     
-            const fetchUsers = async () => {
-                try {
-                    let detailer = [];
-                    const res = await fetch('https://game-api.splinterlands.io/players/details?name=' + player);
-                    if (!res.ok) {
-                        throw new Error(res.status);
-                    }
-                    const data = await res.json();
-                    let ranknumber = Object.values(data)[19].toString()
-                        if (ranknumber == '0') {
-                            rankName = 'Novice';
-                        } else if (ranknumber == "1") {
-                            rankName = 'Bronze III';
-                        } else if (ranknumber == "2") {
-                            rankName = 'Bronze II';
-                        } else if (ranknumber == "3") {
-                            rankName = 'Bronze I';
-                        } else if (ranknumber == "4") {
-                            rankName = 'Silver III';
-                        } else if (ranknumber == "5") {
-                            rankName = 'Silver II';
-                        } else if (ranknumber == "6") {
-                            rankName = 'Silver I';
-                        } else if (ranknumber == "7") {
-                            rankName = 'Gold III';
-                        } else if (ranknumber == "8") {
-                            rankName = 'Gold II';
-                        } else if (ranknumber == "9") {
-                            rankName = 'Gold I';
-                        } else if (ranknumber == "10") {
-                            rankName = 'Diamond III';
-                        } else if (ranknumber == "11") {
-                            rankName = 'Diamond II';
-                        } else if (ranknumber == "12") {
-                            rankName = 'Diamond I';
-                        } else if (ranknumber == "13") {
-                            rankName = 'Champion III';
-                        } else if (ranknumber == "14") {
-                            rankName = 'Champion II';
-                        } else if (ranknumber == "15") {
-                            rankName = 'Champion I';
-                        }
-
-                    detailer.push(' Account name: ' + Object.values(data)[0].toString())
-                    detailer.push(' Current Rating: ' + Object.values(data)[2].toString()) 
-                    detailer.push(' Current Rank: ' + rankName)
-                    detailer.push(' Total Battles: ' + Object.values(data)[3].toString()) 
-                    detailer.push(' Total Wins: ' + Object.values(data)[4].toString())
-                    detailer.push(' Current Streak : ' + Object.values(data)[5].toString())
-                    detailer.push(' Longest Streak: ' + Object.values(data)[6].toString())
-                    detailer.push(' Max Rating Achieved: ' + Object.values(data)[7].toString())
-                    detailer.push(' Max Rank Achieved: ' + Object.values(data)[8].toString())
-                    detailer.push(' Collection Power: ' + Object.values(data)[18].toString())
-
-                    let message = 'Player Details: \n \n' ;
-                    for (let i = 0; i < detailer.length; i++) {
-                        message = message + detailer[i].replace(/\u001b[^m]*?m/g,"") +' \n';
-                    }
-                    //console.log(message)    
-                    bot.sendMessage(msg.from.id, message);
-                    detailer = [];
-                } catch (error) {
-                    bot.sendMessage(msg.from.id, 'Unable to get account details. ');
-                }
+    bot.on(['/accounts', /^\/accountdetails@(.+)$/], (msg) => {
+            let command = msg.text
+            if (command == '/accounts') {
+                let message = 'Please choose which account: \n' +' \n'
+            for (let i = 0; i < accountusers.length; i++) {
+                message = message + 'For ' + accountusers[i] + ':' +' \n'
+                message = message + '/accountdetails@' + accountusers[i] +' \n'
             }
-            
-            fetchUsers();  
+            bot.sendMessage(msg.from.id, message);
+            message = '';
+        }
+    if (command.includes('/accountdetails@') ==  true) {
+        let player = msg.text.split("@")[1]
+        if (!player) {
+            bot.sendMessage(msg.from.id, 'Please include an account name.');   
         } else {
-            bot.sendMessage(msg.from.id, 'Account name you entered is not valid or not included on your .env file.');
-        } 
+        let myaccounts = accountusers.includes(player)
+        if (myaccounts == true) {     
+                const fetchUsers = async () => {
+                    try {
+                        let detailer = [];
+                        const res = await fetch('https://game-api.splinterlands.io/players/details?name=' + player);
+                        if (!res.ok) {
+                            throw new Error(res.status);
+                        }
+                        const data = await res.json();
+                        let ranknumber = Object.values(data)[19].toString()
+                            if (ranknumber == '0') {
+                                rankName = 'Novice';
+                            } else if (ranknumber == "1") {
+                                rankName = 'Bronze III';
+                            } else if (ranknumber == "2") {
+                                rankName = 'Bronze II';
+                            } else if (ranknumber == "3") {
+                                rankName = 'Bronze I';
+                            } else if (ranknumber == "4") {
+                                rankName = 'Silver III';
+                            } else if (ranknumber == "5") {
+                                rankName = 'Silver II';
+                            } else if (ranknumber == "6") {
+                                rankName = 'Silver I';
+                            } else if (ranknumber == "7") {
+                                rankName = 'Gold III';
+                            } else if (ranknumber == "8") {
+                                rankName = 'Gold II';
+                            } else if (ranknumber == "9") {
+                                rankName = 'Gold I';
+                            } else if (ranknumber == "10") {
+                                rankName = 'Diamond III';
+                            } else if (ranknumber == "11") {
+                                rankName = 'Diamond II';
+                            } else if (ranknumber == "12") {
+                                rankName = 'Diamond I';
+                            } else if (ranknumber == "13") {
+                                rankName = 'Champion III';
+                            } else if (ranknumber == "14") {
+                                rankName = 'Champion II';
+                            } else if (ranknumber == "15") {
+                                rankName = 'Champion I';
+                            }
+
+                        detailer.push(' Account name: ' + Object.values(data)[0].toString())
+                        detailer.push(' Current Rating: ' + Object.values(data)[2].toString()) 
+                        detailer.push(' Current Rank: ' + rankName)
+                        detailer.push(' Total Battles: ' + Object.values(data)[3].toString()) 
+                        detailer.push(' Total Wins: ' + Object.values(data)[4].toString())
+                        detailer.push(' Current Streak : ' + Object.values(data)[5].toString())
+                        detailer.push(' Longest Streak: ' + Object.values(data)[6].toString())
+                        detailer.push(' Max Rating Achieved: ' + Object.values(data)[7].toString())
+                        detailer.push(' Max Rank Achieved: ' + Object.values(data)[8].toString())
+                        detailer.push(' Collection Power: ' + Object.values(data)[18].toString())
+
+                        let message = 'Player Details: \n \n' ;
+                        for (let i = 0; i < detailer.length; i++) {
+                            message = message + detailer[i].replace(/\u001b[^m]*?m/g,"") +' \n';
+                        }
+                        //console.log(message)    
+                        bot.sendMessage(msg.from.id, message);
+                        detailer = [];
+                    } catch (error) {
+                        bot.sendMessage(msg.from.id, 'Unable to get account details. ');
+                    }
+                }
+                
+                fetchUsers();  
+            } else {
+                bot.sendMessage(msg.from.id, 'Account name you entered is not valid or not included on your .env file.');
+            } 
+        }
     }
 }); //end of bot.on(['/account']
 
