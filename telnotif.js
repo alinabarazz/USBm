@@ -1,6 +1,6 @@
 require('dotenv').config()
 if (process.env.TELEGRAM_NOTIF === 'true') {
-const moment = require("moment-timezone");    
+const moment = require("moment");    
 const fetch = require("node-fetch");
 const fs = require('fs')
 const chalk = require('chalk');
