@@ -57,12 +57,17 @@ Copy and paste this:
   apk update && apk add --no-cache nmap && \
   echo @edge http://nl.alpinelinux.org/alpine/edge/community >> /etc/apk/repositories && \
   echo @edge http://nl.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories && \
+  echo @edge https://dl-cdn.alpinelinux.org/alpine/edge/community >> /etc/apk/repositories && \
+  echo @edge https://dl-cdn.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories && \
   apk update && \
   apk add --no-cache \
   chromium
 
 - 3rd step: 
-Type: apk add nodejs npm git
+Type the following: 
+- apk add nodejs-current --no-cache
+- apk add npm 
+- apk add git
 
 - 4th step 
 Type: git clone https://github.com/virgaux/ultimate-splinterlands-bot-mobile
