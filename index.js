@@ -3,7 +3,7 @@ require('dotenv').config()
 const puppeteer = require('puppeteer');
 const fetch = require("node-fetch");
 const chalk = require('chalk');
-const fs = require('fs');	
+const fs = require('fs');
 
 const splinterlandsPage = require('./splinterlandsPage');
 const user = require('./user');
@@ -511,34 +511,16 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                     cards: [Object.values(apiResponse)[1], Object.values(apiResponse)[3], Object.values(apiResponse)[5], Object.values(apiResponse)[7], Object.values(apiResponse)[9],
                         Object.values(apiResponse)[11], Object.values(apiResponse)[13], Object.values(apiResponse)[15]]
                 };
-                let subElement = helper.teamActualSplinterToPlay(splinters,teamToPlay.cards.slice(0, 6))
-                if (Object.values(apiResponse)[15]=== 'dragon' && splinters.includes(subElement) == false ) {
-
-                    misc.writeToLog('API choose inappropriate splinter sub-element. Reverting to local history.');
+                apiSelect = true;
+                console.log(chalk.cyan('Team picked by API: ' + JSON.stringify(teamToPlay)));
+                battledata.push(' API was used for this battle.')
+                battledata.push(' Element used: ' + Object.values(apiResponse)[15].toString())
+                // TEMP, testing
+                if (Object.values(apiResponse)[1] == '') {
+                    misc.writeToLog('Seems like the API found no possible team - using local history');
                     const possibleTeams = await ask.possibleTeams(matchDetails).catch(e => misc.writeToLog('Error from possible team API call: ', e));
-                    if (possibleTeams && possibleTeams.length) {
-                        //misc.writeToLog('Possible Teams based on your cards: ', possibleTeams.length, '\n', possibleTeams);
-                        misc.writeToLog('Possible Teams based on your cards: ', possibleTeams.length);
-                    } else {
-                        misc.writeToLog('Error: ', JSON.stringify(matchDetails), JSON.stringify(possibleTeams))
-                        throw new Error('NO TEAMS available to be played');
-                    }
-                    teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);
-                    battledata.push( ' Battle data used: Local history')
-                    useAPI = false;  
-
-                } else {
-                    apiSelect = true;
-                    console.log(chalk.cyan('Team picked by API: ' + JSON.stringify(teamToPlay)));
-                    battledata.push(' Battle data used: API')
-                    battledata.push(' Element used: ' + Object.values(apiResponse)[15].toString())
-                        // TEMP, testing
-                        if (Object.values(apiResponse)[1] == '') {
-                            misc.writeToLog('Seems like the API found no possible team - using local history');
-                            const possibleTeams = await ask.possibleTeams(matchDetails).catch(e => misc.writeToLog('Error from possible team API call: ', e));
-                            teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);  
-                        }
-                }   
+                    teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);  
+                }
             } else {
                 if (apiResponse && JSON.stringify(apiResponse).includes('api limit reached')) {
                     misc.writeToLog('API limit per hour reached, using local backup!');
@@ -558,7 +540,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                     throw new Error('NO TEAMS available to be played');
                 }
                 teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);
-                battledata.push( ' Battle data used: Local history')
+                battledata.push( 'Local History was used for this battle.')
                 useAPI = false;
             }
         } catch (e){
@@ -572,7 +554,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                 throw new Error('NO TEAMS available to be played');
             }
             teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);
-            battledata.push( ' Battle data used: Local history')
+            battledata.push( 'Local History was used for this battle.')
             useAPI = false;
         }                  
     } else {
@@ -585,7 +567,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
             throw new Error('NO TEAMS available to be played');
         }
         teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);
-        battledata.push( ' Battle data used: Local history')
+        battledata.push( 'Local History was used for this battle.')
         useAPI = false;
     }
 
@@ -803,6 +785,7 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
                 await startBotPlayMatch(page, myCards, quest, claimQuestReward, prioritizeQuest, useAPI, logSummary, getDataLocal , battledata)
                 .then(() => {
                     misc.writeToLog('Closing battle');
+                    
                 })
                 .catch((e) => {
                     misc.writeToLog(e)
@@ -821,7 +804,7 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
                     //browsers[0].process().kill('SIGKILL');
                 }
             }
-            misc.writeToLog('Generating battle result... ')
+            misc.writeToLog('Generating battle result... ') 
             battlelog = JSON.stringify(battledata)
             let dataCollect = {
                 battleID : idToken,
@@ -862,7 +845,7 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
                             misc.writeToLogNoUsername('Successfully saving battle history')
                             battledata = [];
                             dataCollected= [];
-                            dataCollect ={};
+                            dataCollect ={};                   
                         }
                     })
                 }    

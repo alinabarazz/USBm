@@ -7,7 +7,7 @@ getPlayerCards = (username, oneDayAgo) => (fetch(`https://game-api.splinterlands
   .then(x => x['cards'] ? x['cards'].filter(x=>(x.delegated_to === null || x.delegated_to === username)
   && (x.market_listing_type === null || x.delegated_to === username)
   && (!(x.last_used_player !== username && Date.parse(x.last_used_date) > oneDayAgo))).map(card => card.card_detail_id) : '')
-  .then(advanced => basicCards.concat(advanced))
+  .then(advanced => advanced.concat(basicCards))
    .catch(e=> {
     console.log('Error: game-api.splinterlands did not respond trying api.slinterlands... ');
     fetch(`https://api.splinterlands.io/cards/collection/${username}`,
@@ -16,7 +16,7 @@ getPlayerCards = (username, oneDayAgo) => (fetch(`https://game-api.splinterlands
       .then(x => x['cards'] ? x['cards'].filter(x=>(x.delegated_to === null || x.delegated_to === username) 
 	  && (x.market_listing_type === null || x.delegated_to === username)
 	  && (!(x.last_used_player !== username && Date.parse(x.last_used_date) > oneDayAgo))).map(card => card.card_detail_id) : '')
-      .then(advanced => basicCards.concat(advanced))
+      .then(advanced => advanced.concat(basicCards))
       .catch(e => {
         console.log('Using only basic cards due to error when getting user collection from splinterlands: ',e); 
         return basicCards
