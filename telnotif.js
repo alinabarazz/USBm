@@ -275,52 +275,54 @@ bot.on(['/questreward'], (msg) => {
             const allCardDetails =  await readJSONFile(fnAllCardsDetails);
             const data =  await makeGetRequest('https://api.steemmonsters.io/players/history?username=' + namer[j] + '&types=claim_reward'); 
             const data1 = data[0] 
-            try{
+                try{
                     const generalResult = Object.values(JSON.parse(Object.values(data1)[11]).rewards) // general result
-                    let detailer1 = [];
-                    let timer = moment.utc((Object.values(data1)[10].split('T')[1]).split('.')[0],["HH.mm"]).local().format("hh:mm a"); 
-                    let dater = moment.utc(Object.values(data1)[10].split('T')[0]).local().format('MM-DD-YYYY');
-                    let message1 = ' ' + namer[j] + ' \n' +' Received at ' + dater + ' ' +  timer + ' \n'
-                    for (let i = 0; i < generalResult.length; i++) {
-                        rewardcard = Object.values(generalResult[i])[0]
-                        if (rewardcard === 'reward_card'){
-                            cardNumber = Object.values(Object.values(generalResult[i])[2])[1]
-                            goldFoil = Object.values(Object.values(generalResult[i])[2])[3]
-                            if (goldFoil == false ) {
-                                detailer1.push(' Card: ' + allCardDetails[(parseInt(cardNumber))-1].name.toString())
-                            } else {
-                                detailer1.push(' Card: GoldFoil' + allCardDetails[(parseInt(cardNumber))-1].name.toString())     
-                            }  
-                        } else if (rewardcard === 'potion'){
-                            detailer1.push(' ' + Object.values(generalResult[i])[2] + ' Potion Qty: ' + Object.values(generalResult[i])[1])
-                        } else if (rewardcard === 'dec'){
-                            detailer1.push(' DEC Qty: ' + Object.values(generalResult[i])[1])
-                        } else if (rewardcard === 'credits'){ 
-                            detailer1.push(' Credits Qty: ' + Object.values(generalResult[i])[1])
+                    if (!generalResult) {
+                        rewardData.push(' ' + namer[j] + ' \nNo data found.') 
+                    } else {
+                        let detailer1 = [];
+                        let timer = moment.utc((Object.values(data1)[10].split('T')[1]).split('.')[0],["HH.mm"]).local().format("hh:mm a"); 
+                        let dater = moment.utc(Object.values(data1)[10].split('T')[0]).local().format('MM-DD-YYYY');
+                        let message1 = ' ' + namer[j] + ' \n' +' Received at ' + dater + ' ' +  timer + ' \n'
+                        for (let i = 0; i < generalResult.length; i++) {
+                            rewardcard = Object.values(generalResult[i])[0]
+                            if (rewardcard === 'reward_card'){
+                                cardNumber = Object.values(Object.values(generalResult[i])[2])[1]
+                                goldFoil = Object.values(Object.values(generalResult[i])[2])[3]
+                                if (goldFoil == false ) {
+                                    detailer1.push(' Card: ' + allCardDetails[(parseInt(cardNumber))-1].name.toString())
+                                } else {
+                                    detailer1.push(' Card: GoldFoil' + allCardDetails[(parseInt(cardNumber))-1].name.toString())     
+                                }  
+                            } else if (rewardcard === 'potion'){
+                                detailer1.push(' ' + Object.values(generalResult[i])[2] + ' Potion Qty: ' + Object.values(generalResult[i])[1])
+                            } else if (rewardcard === 'dec'){
+                                detailer1.push(' DEC Qty: ' + Object.values(generalResult[i])[1])
+                            } else if (rewardcard === 'credits'){ 
+                                detailer1.push(' Credits Qty: ' + Object.values(generalResult[i])[1])
+                            }
                         }
-        
-                    }                                
-                        for (let i = 0; i < detailer1.length; i++) {
-                            message1 = message1 + detailer1[i] +' \n';
-                        }    
-        
-                        rewardData.push(message1)  
-            } catch {
-                rewardData.push(' ' + Object.values(data1)[8] + ' \n')   
-            }             
-        }
-        let message = ' Quest rewards result: '  + ' \n' + ' \n'
-        if (!rewardData) {
-          console.log('No data.')
-        } else {
-          for (let i = 0; i < rewardData.length; i++) {
-              message = message + rewardData[i] +' \n';
-          }
-          
-        }  
-        rewardData = '';   
-        bot.sendMessage(msg.from.id, message);
-      } 
+                            for (let i = 0; i < detailer1.length; i++) {
+                                message1 = message1 + detailer1[i] +' \n';
+                            }    
+                            rewardData.push(message1) 
+                    }
+                } catch {
+                    rewardData.push(' ' + Object.values(data1)[8] + ' \n')   
+                }             
+            }
+            let message = ' Quest rewards result: '  + ' \n' + ' \n'
+            if (!rewardData) {
+                console.log('No data.')
+            } else {
+                for (let i = 0; i < rewardData.length; i++) {
+                    message = message + rewardData[i] +' \n';
+                }
+            
+            }  
+            rewardData = '';   
+            bot.sendMessage(msg.from.id, message);
+        } 
          main();
         
          
