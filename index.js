@@ -305,16 +305,26 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
     await page.goto('https://splinterlands.com/?p=battle_history');
     await page.waitForTimeout(4000);
 
-    let username = await getElementText(page, '.dropdown-toggle .bio__name__display', 10000);
+    let username = await getElementText(page, '.dropdown-toggle .bio__name__display', 10000).catch(async () => {
+        await page.goto('https://splinterlands.com/?p=battle_history');
+        await page.waitForTimeout(4000);
+        await getElementText(page, '.dropdown-toggle .bio__name__display', 10000)
+    });
 
     if (username == process.env.ACCUSERNAME) {
         misc.writeToLog('Already logged in!');
     } else {
         misc.writeToLog('Login')
-        await splinterlandsPage.login(page).catch(e => {
-            misc.writeToLog(e);
-            logSummary.push(chalk.red(' No records due to login error'));
-            throw new Error('Login Error');
+        await splinterlandsPage.login(page).catch(async () => {
+            misc.writeToLog('Unable to login. Trying to reload page again.');
+            await page.goto('https://splinterlands.com/?p=battle_history');
+            await page.waitForTimeout(4000);
+                await splinterlandsPage.login(page).catch(e => {    
+                misc.writeToLog(e);
+                logSummary.push(chalk.red(' No records due to login error'));
+                misc.writeToLog('Skipping this account due to to login error. \n' + e);
+                return;
+                });
         });
     }
     await waitUntilLoaded(page);
