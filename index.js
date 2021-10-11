@@ -4,7 +4,6 @@ const puppeteer = require('puppeteer');
 const fetch = require("node-fetch");
 const chalk = require('chalk');
 const fs = require('fs');	
-const UserAgent = require('user-agents');
 
 const splinterlandsPage = require('./splinterlandsPage');
 const user = require('./user');
@@ -296,8 +295,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
     } else {
         misc.writeToLog('Playing only basic cards')
     }
-    const userAgent = new UserAgent([/Chrome/,{deviceCategory: 'desktop'},{platform: 'Win32'}]);
-    await page.setUserAgent(userAgent.random().toString());
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36');
     await page.setViewport({
         width: 1800,
         height: 1500,

@@ -20,8 +20,7 @@
     "node-fetch": "^2.6.1",
     "pg": "^8.0.3",
     "puppeteer": "^10.1.0",
-    "telebot": "^1.4.1",
-    "user-agents": "^1.0.800"
+    "telebot": "^1.4.1"
   },
   "repository": {
     "type": "git",
@@ -34,5 +33,6 @@
   "bugs": {
     "url": "https://github.com/virgaux/ultimate-splinterlands-bot-mobile/issues"
   },
-  "homepage": "https://github.com/virgaux/ultimate-splinterlands-bot-mobile#readme"
+  "homepage": "https://github.com/virgaux/ultimate-splinterlands-bot-mobile#readme",
+  "devDependencies": {}
 }
