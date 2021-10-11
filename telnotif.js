@@ -276,10 +276,10 @@ bot.on(['/questreward'], (msg) => {
             const data =  await makeGetRequest('https://api.steemmonsters.io/players/history?username=' + namer[j] + '&types=claim_reward'); 
             const data1 = data[0] 
                 try{
-                    const generalResult = Object.values(JSON.parse(Object.values(data1)[11]).rewards) // general result
-                    if (!generalResult) {
+                    if (!data) {
                         rewardData.push(' ' + namer[j] + ' \nNo data found.') 
                     } else {
+                        const generalResult = Object.values(JSON.parse(Object.values(data1)[11]).rewards) // general result
                         let detailer1 = [];
                         let timer = moment.utc((Object.values(data1)[10].split('T')[1]).split('.')[0],["HH.mm"]).local().format("hh:mm a"); 
                         let dater = moment.utc(Object.values(data1)[10].split('T')[0]).local().format('MM-DD-YYYY');
