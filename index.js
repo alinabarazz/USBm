@@ -389,7 +389,9 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
         }
     }
     let curRating = await getElementText(page, 'span.number_text', 2000);
-    await misc.writeToLog('Current Rating is ' + chalk.yellow(curRating));
+    misc.writeToLog('');
+    quester['Quest Details:'] = quest;
+    console.table(quester);
     
     //if quest done claim reward
     misc.writeToLog('Quest details: ' + chalk.yellow(JSON.stringify(quest)));
@@ -540,17 +542,17 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                     apiSelect = true;
                     console.log(chalk.cyan('Team picked by API: '));
                     console.table({
-                        Play_for_quest: Object.values(apiResponse)[0],
-                        Team_Rank: Object.values(apiResponse)[16],
-                        Win_Percentage : (Object.values(apiResponse)[2].replace(',','.')* 100).toFixed(2) + '%',   
-                        Element : Object.values(apiResponse)[15],  
-                        Summoner: Object.values(apiResponse)[1],
-                        Cards_1: Object.values(apiResponse)[3], 
-                        Cards_2: Object.values(apiResponse)[5],
-                        Cards_3: Object.values(apiResponse)[7],
-                        Cards_4: Object.values(apiResponse)[9],
-                        Cards_5: Object.values(apiResponse)[11],
-                        Cards_6:  Object.values(apiResponse)[13]         
+                        'Play for quest': Object.values(apiResponse)[0],
+                        'Team Rank': Object.values(apiResponse)[16],
+                        'Win Percentage' : (Object.values(apiResponse)[2].replace(',','.')* 100).toFixed(2) + '%',   
+                        'Element' : Object.values(apiResponse)[15],  
+                        'Summoner': Object.values(apiResponse)[1],
+                        'Cards 1': Object.values(apiResponse)[3], 
+                        'Cards 2': Object.values(apiResponse)[5],
+                        'Cards 3': Object.values(apiResponse)[7],
+                        'Cards 4': Object.values(apiResponse)[9],
+                        'Cards 5': Object.values(apiResponse)[11],
+                        'Cards 6': Object.values(apiResponse)[13]         
                     });
                     battledata.push(' Battle data used: API')
                     battledata.push(' Element used: ' + Object.values(apiResponse)[15].toString())
