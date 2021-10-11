@@ -5,14 +5,14 @@ npm update
 cd node_modules/puppeteer
 if [-e  .local-chromium] 
 then 
-  cd ..\..\ 
+node install.js
+cd ultimate-splinterlands-bot-mobile
 else
-   node install
-cd ..\..\ 
+cd ultimate-splinterlands-bot-mobile
 fi
-echo.
+
 echo Installation complete!
-echo.
+
 echo "Want to start the bot now?"
 select yn in "Yes" "No"; do
     case $yn in
