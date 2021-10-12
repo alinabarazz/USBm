@@ -782,6 +782,8 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
         envStatus.push('Telegram Notification: ' + teleNotif);
         envStatus.push('Use API: ' + useAPI);
         envStatus.push('Accounts: ' + chalk.greenBright(accounts));
+        const os = require("os"); // Comes with node.js
+        console.log(os.type());
 
         if (process.env.TELEGRAM_NOTIF === 'true') { 
             await tn.tbotResponse(envStatus)
