@@ -390,10 +390,10 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
     }
     let curRating = await getElementText(page, 'span.number_text', 2000);
     await misc.writeToLog('Current Rating is ' + chalk.yellow(curRating));
-    
+
     //if quest done claim reward
     let quester = {}
-    quester['Quest Details:'] = quest;
+    quester['Quest:'] = quest;
     console.table(quester);
     try {
         const claimButton = await page.waitForSelector('#quest_claim_btn', {
