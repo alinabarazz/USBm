@@ -1,4 +1,4 @@
-# Ultimate Splinterlands Bot V1 Mobile by Virgaux
+# USBm by Virgaux
 A fast, free, multi-account splinderlands bot
 
 Based on https://github.com/PCJones/ultimate-splinterlands-bot
