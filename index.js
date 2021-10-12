@@ -546,13 +546,14 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                         'Team Rank': Object.values(apiResponse)[16],
                         'Win Percentage' : (Object.values(apiResponse)[2].replace(',','.')* 100).toFixed(2) + '%',   
                         'Element' : Object.values(apiResponse)[15],  
-                        'Summoner': Object.values(apiResponse)[1],
-                        'Cards 1': Object.values(apiResponse)[3], 
-                        'Cards 2': Object.values(apiResponse)[5],
-                        'Cards 3': Object.values(apiResponse)[7],
-                        'Cards 4': Object.values(apiResponse)[9],
-                        'Cards 5': Object.values(apiResponse)[11],
-                        'Cards 6': Object.values(apiResponse)[13]         
+                        'Summoner': allCardDetails[(parseInt(Object.values(apiResponse)[1]))-1].name.toString(),
+                        'Cards 1': allCardDetails[(parseInt(Object.values(apiResponse)[3]))-1].name.toString(), 
+                        'Cards 2': allCardDetails[(parseInt(Object.values(apiResponse)[5]))-1].name.toString(),
+                        'Cards 3': allCardDetails[(parseInt(Object.values(apiResponse)[7]))-1].name.toString(),
+                        'Cards 4': allCardDetails[(parseInt(Object.values(apiResponse)[9]))-1].name.toString(),
+                        'Cards 5': allCardDetails[(parseInt(Object.values(apiResponse)[11]))-1].name.toString(),
+                        'Cards 6': allCardDetails[(parseInt(Object.values(apiResponse)[13]))-1].name.toString()    
+                            
                     });
                     battledata.push(' Battle data used: API')
                     battledata.push(' Element used: ' + Object.values(apiResponse)[15].toString())
