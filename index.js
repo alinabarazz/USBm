@@ -3,7 +3,7 @@ require('dotenv').config()
 const puppeteer = require('puppeteer');
 const fetch = require("node-fetch");
 const chalk = require('chalk');
-const fs = require('fs');	
+const fs = require('fs');
 
 const splinterlandsPage = require('./splinterlandsPage');
 const user = require('./user');
@@ -285,10 +285,12 @@ async function selectCorrectBattleType(page) {
     }
 }
 
-async function startBotPlayMatch(page, myCards, quest, claimQuestReward, prioritizeQuest, useAPI, logSummary, getDataLocal, battledata) {
+async function startBotPlayMatch(page, myCards, quest, claimQuestReward, prioritizeQuest, useAPI, logSummary, getDataLocal, battledata , logSummary1) {
+    newlogvisual = {};
     const ercThreshold = process.env.ERC_THRESHOLD;
     const allCardDetails = await readJSONFile(fnAllCardsDetails);
     logSummary.push(' \n -----' + process.env.ACCUSERNAME + '-----')
+    logSummary1[process.env.ACCUSERNAME] = newlogvisual
     battledata.push(' \n -----' + process.env.ACCUSERNAME + '-----')
     if (myCards) {
         misc.writeToLog('Deck size: ' + myCards.length)
@@ -356,9 +358,11 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
     if(power < powerThreshold){
         misc.writeToLog('Collection Power: ' + chalk.red(powerRaw) + ' is lower than the ' + chalk.red(powerThresholdRaw) + ' you have set.');
         logSummary.push(' Collection Power: ' + chalk.red(powerRaw) + ' is lower than the ' + chalk.red(powerThresholdRaw) + ' you have set.');
+        newlogvisual['Power'] = power
     } else {
         misc.writeToLog('Collection Power: ' + chalk.green(powerRaw));
         logSummary.push(' Collection Power: ' + chalk.green(powerRaw));
+        newlogvisual['Power'] = power
     }
     // boart2k end
 
@@ -390,7 +394,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
     }
     let curRating = await getElementText(page, 'span.number_text', 2000);
     await misc.writeToLog('Current Rating is ' + chalk.yellow(curRating));
-
+    
     //if quest done claim reward
     let quester = {}
     quester['Quest:'] = quest;
@@ -552,8 +556,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                         'Cards 3': Object.values(apiResponse)[7],
                         'Cards 4': Object.values(apiResponse)[9],
                         'Cards 5': Object.values(apiResponse)[11],
-                        'Cards 6': Object.values(apiResponse)[13]    
-                             
+                        'Cards 6': Object.values(apiResponse)[13]         
                     });
                     battledata.push(' Battle data used: API')
                     battledata.push(' Element used: ' + Object.values(apiResponse)[15].toString())
@@ -563,7 +566,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                             const possibleTeams = await ask.possibleTeams(matchDetails).catch(e => misc.writeToLog('Error from possible team API call: ', e));
                             teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);  
                         }
-                }   
+                }
             } else {
                 if (apiResponse && JSON.stringify(apiResponse).includes('api limit reached')) {
                     misc.writeToLog('API limit per hour reached, using local backup!');
@@ -682,28 +685,32 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                 const decWon = await getElementText(page, '.battle-log-entry .battle-log-entry__vs.win  .conflict__dec', 1000);
                 misc.writeToLog(chalk.green('You won! Reward: ' + decWon));
 				logSummary.push(' Battle result:' + chalk.green(' Win Reward: ' + decWon));
+                newlogvisual['Battle Result'] = 'Win ' + decWon
                 battledata.push(' Battle result: Won');
             } else if (draw.trim() == "Draw") {
                 misc.writeToLog(chalk.yellow("It's a draw"));
                 battledata.push(' Battle result: Draw');
                 logSummary.push(' Battle result:' + chalk.blueBright(' Draw'));
+                newlogvisual['Battle Result'] = 'Draw'
             } else {
                 misc.writeToLog(chalk.red('You lost :('));
                 battledata.push(' Battle result: Lost');
 				logSummary.push(' Battle result:' + chalk.red(' Lose'));
+                newlogvisual['Battle Result'] = 'Lose'
                 if (useAPI) {
                     api.reportLoss(winner);
                 }
             }
             if (getDataLocal == true) {
                 misc.writeToLog("Gathering winner's battle data for local history backup") 
-                await battles.battlesList(process.env.ACCUSERNAME).then(x=>x).catch((e) => misc.writeToLog('Unable to gather data for local.' + e));  
+                battles.battlesList(process.env.ACCUSERNAME).then(x=>x).catch((e) => misc.writeToLog('Unable to gather data for local.' + e));  
             }  
         } catch (e) {
                 misc.writeToLog(e);
                 misc.writeToLog(chalk.blueBright('Could not find winner'));
                 battledata.push(' Could not find winner');
-                logSummary.push(chalk.blueBright(' Could not find winner'));              
+                logSummary.push(chalk.blueBright(' Could not find winner'));
+                newlogvisual['Battle Result'] = 'Could not find winner'            
         }
         try {	
 			let decRaw = await getElementText(page, 'div.balance', 2000);
@@ -713,6 +720,8 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
             misc.writeToLog('Updated Rating after battle is ' + chalk.yellow(curRating));
             logSummary.push(' New rating: ' + chalk.yellow(curRating));
 			logSummary.push(' New DEC Balance: ' + chalk.cyan(UpDateDec + ' DEC'));
+            newlogvisual['Rating'] = curRating
+            newlogvisual['DEC Balance'] = UpDateDec + ' dec'
 			let e = parseInt(newERC);
                 if (e >= 50) {
                     newERC = chalk.green(newERC + '%')
@@ -722,6 +731,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                 }
                 logSummary.push(' Remaining ERC: ' + newERC);
                 misc.writeToLog('Remaining ERC: ' + newERC);
+                newlogvisual['ERC'] = newERC.replace(/\u001b[^m]*?m/g,"")
 
         } catch (e) {
             misc.writeToLog(e);
@@ -729,9 +739,11 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
             misc.writeToLog(chalk.blueBright(' Unable to get remaining ERC'));
             logSummary.push(chalk.blueBright(' Unable to get new rating'));
             logSummary.push(chalk.blueBright(' Unable to get remaining ERC '));
+            newlogvisual['Rating'] = 'n/a'
+            newlogvisual['DEC Balance'] = 'n/a'
         }
         let Newquest = await getQuest();	
-		await nq.newquestUpdate(Newquest, claimQuestReward, page, logSummary, allCardDetails, searchFromJSON);
+		await nq.newquestUpdate(Newquest, claimQuestReward, page, logSummary, allCardDetails, searchFromJSON, newlogvisual);
         teamToPlay = '';
     } catch (e) {
         logSummary.push(chalk.red(' Unable to proceed due to error. Please see logs'));
@@ -758,6 +770,7 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
         const prioritizeQuest = JSON.parse(process.env.QUEST_PRIORITY.toLowerCase());
         const teleNotif = JSON.parse(process.env.TELEGRAM_NOTIF.toLowerCase());
         const getDataLocal = JSON.parse(process.env.GET_DATA_FOR_LOCAL.toLowerCase());
+        const logDisplay = process.env.NEW_LOG_DISPLAY.toLowerCase();
 
         
         let browsers = [];
@@ -769,6 +782,7 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
         misc.writeToLogNoUsername('Claim Quest Reward: ' + claimQuestReward);
         misc.writeToLogNoUsername('Prioritize Quests: ' + prioritizeQuest);
         misc.writeToLogNoUsername('Telegram Notification: ' + teleNotif);
+        misc.writeToLogNoUsername('Log Display: ' + logDisplay);
         misc.writeToLogNoUsername('Use API: ' + useAPI);
         misc.writeToLogNoUsername('Loaded ' + chalk.yellow(accounts.length) + ' Accounts');
         misc.writeToLogNoUsername('Accounts: ' + chalk.greenBright(accounts));
@@ -781,8 +795,8 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
         envStatus.push('Prioritize Quests: ' + prioritizeQuest);
         envStatus.push('Telegram Notification: ' + teleNotif);
         envStatus.push('Use API: ' + useAPI);
-        envStatus.push('Accounts: ' + chalk.greenBright(accounts));
-        console.log(process.platform)
+        envStatus.push('Accounts: ' + accounts);
+        envStatus.push('Log Display: ' + logDisplay);
 
         if (process.env.TELEGRAM_NOTIF === 'true') { 
             await tn.tbotResponse(envStatus)
@@ -792,6 +806,7 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
         while (true) {
             let dataCollected = [];
             let logSummary = [];
+            let logSummary1 = [];
             let battledata = [];
             var idToken = (Math.random() + 1).toString(36).substring(2)
             var battleID = 'ID' + idToken;
@@ -826,7 +841,7 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
                 if (!quest) {
                     misc.writeToLog('Error for quest details. Splinterlands API didnt work or you used incorrect username');
                 }
-                await startBotPlayMatch(page, myCards, quest, claimQuestReward, prioritizeQuest, useAPI, logSummary, getDataLocal , battledata)
+                await startBotPlayMatch(page, myCards, quest, claimQuestReward, prioritizeQuest, useAPI, logSummary, getDataLocal , battledata, logSummary1)
                 .then(() => {
                     misc.writeToLog('Closing battle');
                 })
@@ -860,9 +875,17 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
 			let tet = ' Total execution time: ' + chalk.green((totalTime / 1000 / 60).toFixed(2) + ' mins')
             console.log('--------------------------Battle Result Summary:----------------------');
             console.log(tet);
-			if (accounts.length > 1) {
-				logSummary.forEach(x => console.log(x));
-			}
+			if (logDisplay == 'default'){
+                if (accounts.length > 1) {
+                    logSummary.forEach(x => console.log(x));
+                }
+            } else if (logDisplay == 'desktop') {
+                console.table(logSummary1)
+
+            } else if (logDisplay == 'mobile') {
+                console.table(logSummary1,["Power",'Battle Result','Rating','DEC Balance'])
+                console.table(logSummary1,['ERC', 'Quest','Reward'])
+            }
 			// telegram notification 
 
 			if (process.env.TELEGRAM_NOTIF === 'true') {
