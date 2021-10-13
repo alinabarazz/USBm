@@ -92,7 +92,7 @@ let promises = [];
 
 
 
-const battles = async (player) =>  getBattleHistory(player)
+const battles = (player) =>  getBattleHistory(player)
   .then(u => u.map(x => { 
       //x.player_1 == process.env.ACCUSERNAME
     return [x.player_1, x.player_2] 
