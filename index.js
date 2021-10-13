@@ -875,14 +875,14 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
 			let tet = ' Total execution time: ' + chalk.green((totalTime / 1000 / 60).toFixed(2) + ' mins')
             console.log('--------------------------Battle Result Summary:----------------------');
             console.log(tet);
-			if (logDisplay == 'default'){
+			if (unitverstion == 'default'){
                 if (accounts.length > 1) {
                     logSummary.forEach(x => console.log(x));
                 }
-            } else if (logDisplay == 'desktop') {
+            } else if (unitverstion == 'desktop') {
                 console.table(logSummary1)
 
-            } else if (logDisplay == 'mobile') {
+            } else if (unitverstion == 'mobile') {
                 console.table(logSummary1,["Power",'Battle Result','Rating','DEC Balance'])
                 console.table(logSummary1,['ERC', 'Quest','Reward'])
             }
