@@ -558,7 +558,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                     useAPI = false;  
 
                 } else {
-                   if  (winPercent>=50 && process.env.AUTO_SWITCH.toLowerCase() == 'true') {  // auto-select to local if win percentage is below 50%
+                   if  (winPercent>=50 && JSON.parse(process.env.AUTO_SWITCH.toLowerCase()) == 'true') {  // auto-select to local if win percentage is below 50%
                         apiSelect = true;
                         battledata.push(' Battle data used: API')
                         battledata.push(' Element used: ' + Object.values(apiResponse)[15].toString())
@@ -786,7 +786,6 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
         const prioritizeQuest = JSON.parse(process.env.QUEST_PRIORITY.toLowerCase());
         const teleNotif = JSON.parse(process.env.TELEGRAM_NOTIF.toLowerCase());
         const getDataLocal = JSON.parse(process.env.GET_DATA_FOR_LOCAL.toLowerCase());
-        const logDisplay = process.env.NEW_LOG_DISPLAY.toLowerCase();
 
         
         let browsers = [];
@@ -798,7 +797,6 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
         misc.writeToLogNoUsername('Claim Quest Reward: ' + claimQuestReward);
         misc.writeToLogNoUsername('Prioritize Quests: ' + prioritizeQuest);
         misc.writeToLogNoUsername('Telegram Notification: ' + teleNotif);
-        misc.writeToLogNoUsername('Log Display: ' + logDisplay);
         misc.writeToLogNoUsername('Use API: ' + useAPI);
         misc.writeToLogNoUsername('Loaded ' + chalk.yellow(accounts.length) + ' Accounts');
         misc.writeToLogNoUsername('Accounts: ' + chalk.greenBright(accounts));
@@ -812,7 +810,6 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
         envStatus.push('Telegram Notification: ' + teleNotif);
         envStatus.push('Use API: ' + useAPI);
         envStatus.push('Accounts: ' + accounts);
-        envStatus.push('Log Display: ' + logDisplay);
 
         if (process.env.TELEGRAM_NOTIF === 'true') { 
             await tn.tbotResponse(envStatus)
