@@ -557,18 +557,8 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                     useAPI = false;  
 
                 } else {
-                    winPercent = (Object.values(apiResponse)[2].replace(',','.')* 100).toFixed(2)
-                   if  (winPercent>=50 && JSON.parse(process.env.AUTO_SWITCH.toLowerCase()) == 'true') {  // auto-select to local if win percentage is below 50%
-                        apiSelect = true;
-                        battledata.push(' Battle data used: API')
-                        battledata.push(' Element used: ' + Object.values(apiResponse)[15].toString())
-                        // TEMP, testing
-                        if (Object.values(apiResponse)[1] == '') {
-                            misc.writeToLog('Seems like the API found no possible team - using local history');
-                            const possibleTeams = await ask.possibleTeams(matchDetails).catch(e => misc.writeToLog('Error from possible team API call: ', e));
-                            teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);  
-                        }
-                    } else {
+                        winPercent = (Object.values(apiResponse)[2].replace(',','.')* 100).toFixed(2)
+                   if  (winPercent<50 && JSON.parse(process.env.AUTO_SWITCH.toLowerCase()) == 'true') {  // auto-select to local if win percentage is below 50%
                         misc.writeToLog('API choose low winning percentage splinter . Reverting to local history.');
                         const possibleTeams = await ask.possibleTeams(matchDetails).catch(e => misc.writeToLog('Error from possible team API call: ', e));
                         if (possibleTeams && possibleTeams.length) {
@@ -581,6 +571,16 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                         teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);
                         battledata.push( ' Battle data used: Local history')
                         useAPI = false;  
+                    } else {
+                        apiSelect = true;
+                        battledata.push(' Battle data used: API')
+                        battledata.push(' Element used: ' + Object.values(apiResponse)[15].toString())
+                        // TEMP, testing
+                        if (Object.values(apiResponse)[1] == '') {
+                            misc.writeToLog('Seems like the API found no possible team - using local history');
+                            const possibleTeams = await ask.possibleTeams(matchDetails).catch(e => misc.writeToLog('Error from possible team API call: ', e));
+                            teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);  
+                        }
                     }    
                 }
             } else {
