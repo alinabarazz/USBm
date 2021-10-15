@@ -49,7 +49,8 @@ or
     Using terminal only: 
     Copy link from AndroNix for terminal only. Paste in Termux the copied linked. 
     Paste in Termux the copied linked.
-    After installation, type  bash start-alpine.sh
+    After installation, type  bash alpine.sh
+    then after type ./start-alpine.sh
     (Try to google steps on how to log in on your preferred distro)           
 
 - 2nd step (Install chromium)
