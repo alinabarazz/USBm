@@ -74,9 +74,9 @@ Type the following:
 Type: git clone https://github.com/virgaux/USBm
 
 - 5th step 
-Type cd ultimate-splinterlands-bot
-Install nano by typing apk add nano 
-Fill nano .env-example
+- Type cd USBm
+- Install nano by typing: apk add nano 
+- Fill nano .env-example
 
  - 6th step
 Edit the data inside the .env-example
