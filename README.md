@@ -49,7 +49,8 @@ or
     Using terminal only: 
     Copy link from AndroNix for terminal only. Paste in Termux the copied linked. 
     Paste in Termux the copied linked.
-    After installation, type  bash start-alpine.sh
+    After installation, type  bash alpine.sh
+    then after type ./start-alpine.sh
     (Try to google steps on how to log in on your preferred distro)           
 
 - 2nd step (Install chromium)
@@ -70,7 +71,7 @@ Type the following:
 - apk add git
 
 - 4th step 
-Type: git clone https://github.com/virgaux/ultimate-splinterlands-bot-mobile
+Type: git clone https://github.com/virgaux/USBm
 
 - 5th step 
 Type cd ultimate-splinterlands-bot
