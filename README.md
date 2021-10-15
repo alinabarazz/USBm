@@ -70,7 +70,7 @@ Type the following:
 - apk add git
 
 - 4th step 
-Type: git clone https://github.com/virgaux/ultimate-splinterlands-bot-mobile
+Type: git clone https://github.com/virgaux/USBm
 
 - 5th step 
 Type cd ultimate-splinterlands-bot
