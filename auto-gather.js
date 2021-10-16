@@ -3,6 +3,7 @@ const fetch = require("node-fetch");
 const fs = require('fs');
 const misc = require('./misc');
 const chalk = require('chalk');
+const axios = require('axios');
 
 
 const distinct = (value, index, self) => {
@@ -23,18 +24,11 @@ async function delay() {
   
   async function getBattleHistory(player = '', data = {}) {
       //console.log('player', player);
-      const battleHistory = await fetch(`https://game-api.splinterlands.io/battle/history?player=${player}`, {
-        method: 'GET', // *GET, POST, PUT, DELETE, etc.
-        mode: 'no-cors', // no-cors, *cors, same-origin
-        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-        credentials: 'same-origin', // include, *same-origin, omit
-        headers: {
-          'Content-Type': 'application/json'
-          // 'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        redirect: 'follow', // manual, *follow, error
-        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-        body: JSON.stringify(data) // body data type must match "Content-Type" header
+      //const battleHistory = await fetch(`https://game-api.splinterlands.io/battle/history?player=${player}`)
+      const battleHistory = await axios({
+        method: 'get',
+        url: `https://game-api.splinterlands.io/battle/history?player=${player}`,
+        withCredentials: false,
       })
           .then(async (response) => {
               await delay();
