@@ -3,7 +3,6 @@ const fetch = require("node-fetch");
 const fs = require('fs');
 const misc = require('./misc');
 const chalk = require('chalk');
-const axios = require('axios');
 
 
 const distinct = (value, index, self) => {
@@ -25,7 +24,18 @@ async function delay() {
   async function getBattleHistory(player = '', data = {}) {
       //console.log('player', player);
       const battleHistory = await fetch(`https://game-api.splinterlands.io/battle/history?player=${player}`, {
-        mode: 'no-cors'})
+        method: 'GET', // *GET, POST, PUT, DELETE, etc.
+        mode: 'no-cors', // no-cors, *cors, same-origin
+        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: 'same-origin', // include, *same-origin, omit
+        headers: {
+          'Content-Type': 'application/json'
+          // 'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        redirect: 'follow', // manual, *follow, error
+        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: JSON.stringify(data) // body data type must match "Content-Type" header
+      })
           .then(async (response) => {
               await delay();
               if (!response.ok) {
@@ -38,7 +48,8 @@ async function delay() {
           })
           .catch(async (error) => {
             misc.writeToLogNoUsername('Failed to fetch battle data. Trying another api');
-            await axios.get(`https://game-api.splinterlands.io/battle/history?player=${player}`)
+            await fetch(`https://game-api.splinterlands.io/battle/history?player=${player}`, {
+              mode: 'no-cors'})
              .then((response) => {
               if (!response.ok) {
                   throw new Error('Network response was not ok '+player);
@@ -49,7 +60,8 @@ async function delay() {
               return battleHistory.json();
           }) .catch(async (error) => {
             misc.writeToLogNoUsername('Failed to fetch battle data. Trying another api');
-            await axios.get(`https://cache-api.splinterlands.io/battle/history?player=${player}`)
+            await fetch(`https://cache-api.splinterlands.io/battle/history?player=${player}`, {
+              mode: 'no-cors'})
              .then((response) => {
               if (!response.ok) {
                   throw new Error('Network response was not ok '+player);
