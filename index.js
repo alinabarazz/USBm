@@ -210,8 +210,9 @@ async function createBrowsers(count, headless) {
         const browser = await puppeteer.launch({
                 product: 'chrome',
                 headless: headless,
+                //executablePath: 'C://Program Files (x86)//Google//Chrome//Application', 
                 args: process.env.CHROME_NO_SANDBOX === 'true' ? ["--no-sandbox"] : [
-                    '--incognito',
+                    //'--incognito',
                     //'--disable-web-security',
                     //'--disable-features=IsolateOrigins',
                     //'--disable-site-isolation-trials'
@@ -612,14 +613,31 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
         await sleep(300);
         await page.waitForXPath(`//div[@card_detail_id="${teamToPlay.summoner}"]`, {
             timeout: 15000
-        }).then(summonerButton => summonerButton.click());
+        }).then(summonerButton => summonerButton.click()).catch( async (error) =>{ 
+          await page.reload()
+          await page.waitForTimeout(5000);
+          page.click('.btn--create-team')[0];
+          await page.waitForTimeout(5000);
+          await page.waitForXPath(`//div[@card_detail_id="${teamToPlay.summoner}"]`, {
+            timeout: 15000
+            }).then(summonerButton => summonerButton.click())  
+        });
         if (card.color(teamToPlay.cards[0]) === 'Gold') {
             misc.writeToLog(' Dragon play TEAMCOLOR ' + helper.teamActualSplinterToPlay(splinters,teamToPlay.cards.slice(0, 6)))
             battledata.push(' Dragon play TEAMCOLOR ' + helper.teamActualSplinterToPlay(splinters,teamToPlay.cards.slice(0, 6)))
             await page.waitForXPath(`//div[@data-original-title="${helper.teamActualSplinterToPlay(splinters,teamToPlay.cards.slice(0, 6))}"]`, {
                 timeout: 8000
             })
+            .then(selector => selector.click()).catch( async (error) =>{ 
+                await page.reload()
+                await page.waitForTimeout(5000);
+                page.click('.btn--create-team')[0];
+                await page.waitForTimeout(5000);
+                await page.waitForXPath(`//div[@data-original-title="${helper.teamActualSplinterToPlay(splinters,teamToPlay.cards.slice(0, 6))}"]`, {
+                timeout: 8000
+            })
             .then(selector => selector.click())
+            });   
         }
         await page.waitForTimeout(10000);
         misc.writeToLog('Summoner: ' + chalk.yellow(teamToPlay.summoner.toString().padStart(3)) + ' Name: ' + chalk.green(allCardDetails[(parseInt(teamToPlay.summoner))-1].name.toString()));
