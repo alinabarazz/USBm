@@ -24,7 +24,8 @@ async function delay() {
   
   async function getBattleHistory(player = '', data = {}) {
       //console.log('player', player);
-      const battleHistory = await axios.get(`https://game-api.splinterlands.io/battle/history?player=` + player)
+      const battleHistory = await fetch(`https://game-api.splinterlands.io/battle/history?player=${player}`, {
+        mode: 'no-cors'})
           .then(async (response) => {
               await delay();
               if (!response.ok) {
