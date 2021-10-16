@@ -1,9 +1,9 @@
 require('dotenv').config()
-const fetch = require("node-fetch");
+const fetch = require('cross-fetch');
 const fs = require('fs');
 const misc = require('./misc');
 const chalk = require('chalk');
-const axios = require('axios');
+
 
 
 const distinct = (value, index, self) => {
@@ -24,12 +24,7 @@ async function delay() {
   
   async function getBattleHistory(player = '', data = {}) {
       //console.log('player', player);
-      //const battleHistory = await fetch(`https://game-api.splinterlands.io/battle/history?player=${player}`)
-      const battleHistory = await axios({
-        method: 'get',
-        url: `https://game-api.splinterlands.io/battle/history?player=${player}`,
-        withCredentials: false,
-      })
+      const battleHistory = await fetch(`https://game-api.splinterlands.io/battle/history?player=${player}`)
           .then(async (response) => {
               await delay();
               if (!response.ok) {
