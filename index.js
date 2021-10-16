@@ -619,7 +619,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
           page.click('.btn--create-team')[0];
           await page.waitForTimeout(5000);
           await page.waitForXPath(`//div[@card_detail_id="${teamToPlay.summoner}"]`, {
-            timeout: 15000
+            timeout: 30000
             }).then(summonerButton => summonerButton.click())  
         });
         if (card.color(teamToPlay.cards[0]) === 'Gold') {
@@ -634,7 +634,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                 page.click('.btn--create-team')[0];
                 await page.waitForTimeout(5000);
                 await page.waitForXPath(`//div[@data-original-title="${helper.teamActualSplinterToPlay(splinters,teamToPlay.cards.slice(0, 6))}"]`, {
-                timeout: 8000
+                timeout: 30000
             })
             .then(selector => selector.click())
             });   
