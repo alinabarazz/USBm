@@ -32,11 +32,15 @@ async function battlesummary(logSummary,tet,sleepingTime,battletTime,battleID){
             var amount_sliced = messageString.length / max_size
             var start = 0
             var end = max_size
-            for (let i = 0; i < amount_sliced; i++) {
-                message = messageString.slice(start, end) 
-                await bot.sendMessage(process.env.TELEGRAM_CHATID, message);
-                start = start + max_size
-                end = end + max_size
+            if (amount_sliced>1) {
+                for (let i = 0; i < amount_sliced; i++) {
+                    message = messageString.slice(start, end) 
+                    await bot.sendMessage(process.env.TELEGRAM_CHATID, message)
+                    start = start + max_size
+                    end = end + max_size
+                }
+            } else {
+                await bot.sendMessage(process.env.TELEGRAM_CHATID, message)
             }
             //notify.send(message);
             console.log(chalk.green(' \n' + ' Battle result sent to telegram'));
@@ -231,7 +235,21 @@ async function accountsdata (accountusers) {
                             message = message + detailer[i].replace(/\u001b[^m]*?m/g,"") +' \n';
                         }
                         //console.log(message)    
-                        bot.sendMessage(msg.from.id, message);
+                        const max_size = 4096
+                        var messageString = message
+                        var amount_sliced = messageString.length / max_size
+                        var start = 0
+                        var end = max_size
+                        if (amount_sliced>1) {
+                            for (let i = 0; i < amount_sliced; i++) {
+                                message = messageString.slice(start, end) 
+                                await bot.sendMessage(msg.from.id, message)
+                                start = start + max_size
+                                end = end + max_size
+                            }
+                        } else {
+                            await bot.sendMessage(msg.from.id, message)
+                        }
                         detailer = [];
                     } catch (error) {
                         bot.sendMessage(msg.from.id, 'Unable to get account details. ');
@@ -321,7 +339,21 @@ bot.on(['/questreward'], (msg) => {
             
             }  
             rewardData = '';   
-            bot.sendMessage(msg.from.id, message);
+            const max_size = 4096
+            var messageString = message
+            var amount_sliced = messageString.length / max_size
+            var start = 0
+            var end = max_size
+            if (amount_sliced>1) {
+                for (let i = 0; i < amount_sliced; i++) {
+                    message = messageString.slice(start, end) 
+                    await bot.sendMessage(msg.from.id, message)
+                    start = start + max_size
+                    end = end + max_size
+                }
+            } else {
+                await bot.sendMessage(msg.from.id, message)
+            }
         } 
          main();
         
