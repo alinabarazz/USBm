@@ -212,8 +212,8 @@ async function createBrowsers(count, headless) {
                 headless: headless,
                 args: process.env.CHROME_NO_SANDBOX === 'true' ? ["--no-sandbox"] : [
                     //'--incognito',
-                    '--disable-features=BlockInsecurePrivateNetworkRequests',
-                    '--disable-web-security',
+                    //'--disable-features=BlockInsecurePrivateNetworkRequests',
+                    //'--disable-web-security',
                     //'--disable-features=IsolateOrigins',
                     //'--disable-site-isolation-trials'
                 ],
@@ -305,11 +305,11 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
         deviceScaleFactor: 1,
     });
 
-    await page.goto('https://splinterlands.com/?p=battle_history');
+    await page.goto('https://splinterlands.io/?p=battle_history');
     await page.waitForTimeout(4000);
 
     let username = await getElementText(page, '.dropdown-toggle .bio__name__display', 10000).catch(async () => {
-        await page.goto('https://splinterlands.com/?p=battle_history');
+        await page.goto('https://splinterlands.io/?p=battle_history');
         await page.waitForTimeout(4000);
         await getElementText(page, '.dropdown-toggle .bio__name__display', 10000)
     });
@@ -320,7 +320,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
         misc.writeToLog('Login')
         await splinterlandsPage.login(page).catch(async () => {
             misc.writeToLog('Unable to login. Trying to reload page again.');
-            await page.goto('https://splinterlands.com/?p=battle_history');
+            await page.goto('https://splinterlands.io/?p=battle_history');
             await page.waitForTimeout(4000);
             await getElementText(page, '.dropdown-toggle .bio__name__display', 10000)
                 await splinterlandsPage.login(page).catch(e => {
@@ -335,7 +335,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
     try {
         erc = parseInt((await getElementTextByXpath(page, "//div[@class='dec-options'][1]/div[@class='value'][2]/div", 1000)).split('%')[0]);
     } catch {
-        await page.goto('https://splinterlands.com/?p=battle_history');
+        await page.goto('https://splinterlands.io/?p=battle_history');
         erc = parseInt((await getElementTextByXpath(page, "//div[@class='dec-options'][1]/div[@class='value'][2]/div", 1000)).split('%')[0]);
     }
     if (erc >= 50) {
@@ -440,7 +440,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
             .then(() => misc.writeToLog('start the match'))
             .catch(async() => {
                 misc.writeToLog('second attempt failed reloading from homepage...');
-                await page.goto('https://splinterlands.com/?p=battle_history');
+                await page.goto('https://splinterlands.io/?p=battle_history');
                 await page.waitForTimeout(5000);
                 await page.waitForXPath("//button[contains(., 'BATTLE')]", {
                     timeout: 20000
@@ -679,7 +679,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
 
         try {
             misc.writeToLog('Getting battle result...');
-            await page.goto('https://splinterlands.com/?p=battle_history');
+            await page.goto('https://splinterlands.io/?p=battle_history');
             await waitUntilLoaded(page);
             await page.waitForTimeout(5000);
             const winner = await await getElementText(page, '.battle-log-entry .battle-log-entry__team.win  .bio__name__display', 15000);
