@@ -210,11 +210,10 @@ async function createBrowsers(count, headless) {
         const browser = await puppeteer.launch({
                 product: 'chrome',
                 headless: headless,
-                //executablePath: 'C://Program Files (x86)//Google//Chrome//Application', 
                 args: process.env.CHROME_NO_SANDBOX === 'true' ? ["--no-sandbox"] : [
                     //'--incognito',
-                    //'--disable-features=BlockInsecurePrivateNetworkRequests',
-                    //'--disable-web-security',
+                    '--disable-features=BlockInsecurePrivateNetworkRequests',
+                    '--disable-web-security',
                     //'--disable-features=IsolateOrigins',
                     //'--disable-site-isolation-trials'
                 ],
