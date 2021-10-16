@@ -5,19 +5,6 @@ const misc = require('./misc');
 const chalk = require('chalk');
 const axios = require('axios');
 
-      function makeGetRequest(path) {
-        return new Promise(function (resolve, reject) {
-            axios.get(path).then(
-                (response) => {
-                    var result = response.data;
-                    resolve(result);
-                },
-                    (error) => {
-                    reject(error);
-                }
-            );
-        });
-      }
 
 const distinct = (value, index, self) => {
     return self.indexOf(value) === index;
@@ -34,10 +21,11 @@ function uniqueListByKey(arr, key) {
   
   async function getBattleHistory(player = '', data = {}) {
       //console.log('player', player);
-      const battleHistory = await makeGetRequest(`https://game-api.splinterlands.io/battle/history?player=${player}`)
+      const battleHistory = await axios.get(`https://game-api.splinterlands.io/battle/history?player=${player}`)
           .then((response) => {
               if (!response.ok) {
                   throw new Error('Network response was not ok '+player);
+
               }
               return response;
           })
@@ -46,7 +34,7 @@ function uniqueListByKey(arr, key) {
           })
           .catch(async (error) => {
             misc.writeToLogNoUsername('Failed to fetch battle data. Trying another api');
-            await makeGetRequest(`https://game-api.splinterlands.io/battle/history?player=${player}`)
+            await axios.get(`https://game-api.splinterlands.io/battle/history?player=${player}`)
              .then((response) => {
               if (!response.ok) {
                   throw new Error('Network response was not ok '+player);
@@ -57,7 +45,7 @@ function uniqueListByKey(arr, key) {
               return battleHistory.json();
           }) .catch(async (error) => {
             misc.writeToLogNoUsername('Failed to fetch battle data. Trying another api');
-            await makeGetRequest(`https://cache-api.splinterlands.io/battle/history?player=${player}`)
+            await axios.get(`https://cache-api.splinterlands.io/battle/history?player=${player}`)
              .then((response) => {
               if (!response.ok) {
                   throw new Error('Network response was not ok '+player);
