@@ -18,14 +18,17 @@ function uniqueListByKey(arr, key) {
   return [...new Map(arr.map(item => [item[key], item])).values()]
 }
 
+async function delay() {
+  return new Promise(resolve => {resolve()})
+}
   
   async function getBattleHistory(player = '', data = {}) {
       //console.log('player', player);
-      const battleHistory = await axios.get(`https://game-api.splinterlands.io/battle/history?player=${player}`)
-          .then((response) => {
+      const battleHistory = await axios.get(`https://game-api.splinterlands.io/battle/history?player=` + player)
+          .then(async (response) => {
+              await delay();
               if (!response.ok) {
                   throw new Error('Network response was not ok '+player);
-
               }
               return response;
           })
