@@ -777,7 +777,7 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
 
 (async() => {
     try {
-        tn.startTG()
+        if (process.env.TELEGRAM_NOTIF === 'true') { await tn.startTG()}
         await checkForUpdate();
         await checkForMissingConfigs();
         const loginViaEmail = JSON.parse(process.env.LOGIN_VIA_EMAIL.toLowerCase());
