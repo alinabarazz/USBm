@@ -21,8 +21,8 @@ function uniqueListByKey(arr, key) {
 async function delay() {
   return new Promise(resolve => {resolve()})
 }
-const twirlTimer = (function() {
-  var P = ["Loading |", "Loading /", "Loading -", "Loading \\"];
+let twirlTimer = (function() {
+  var P = ["Processing |", "Processing /", "Processing -", "Processing \\"];
   var x = 0;
   return setInterval(function() {
     process.stdout.write("\r" + P[x++]);
