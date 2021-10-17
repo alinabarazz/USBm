@@ -21,14 +21,14 @@ function uniqueListByKey(arr, key) {
 async function delay() {
   return new Promise(resolve => {resolve()})
 }
-let twirlTimer = (function() {
-  var P = ["Processing |", "Processing /", "Processing -", "Processing \\"];
-  var x = 0;
-  return setInterval(function() {
-    process.stdout.write("\r" + P[x++]);
-    x &= 3;
-  }, 250);
-})();
+//const twirlTimer = (function() {
+  //var P = ["Processing |", "Processing /", "Processing -", "Processing \\"];
+  //var x = 0;
+  //return setInterval(function() {
+    //process.stdout.write("\r" + P[x++]);
+    //x &= 3;
+  //}, 250);
+//})();
 
   async function getBattleHistory(player = '', data = {}) {
     process.stdout.write("gathering data of " + player)
@@ -75,7 +75,7 @@ let twirlTimer = (function() {
           });
         });
       });
-        console.log.bind('Gathering data of players...');
+        
       return battleHistory.battles;
       
   }
@@ -163,10 +163,6 @@ const battles = async (player) =>  await getBattleHistory(player)
   }))
   .then(() => { return Promise.all(promises) })
   .then(() => { return new Promise((res,rej) => {
-    clearInterval(twirlTimer)
-    process.stdout.clearLine();
-    process.stdout.cursorTo(0);
-    misc.writeToLogNoUsername('Done fetching data.');
 	  misc.writeToLog('Reading local battle history');
     fs.readFile(`./data/newHistory.json`, 'utf8', (err, data) => {
       if (err) {
@@ -188,5 +184,7 @@ const battles = async (player) =>  await getBattleHistory(player)
       res(battlesList)
     });
   }) })
-
-module.exports.battlesList = battles;
+    //clearInterval(twirlTimer)
+    //process.stdout.clearLine();
+    //process.stdout.cursorTo(0);
+exports.battlesList = battles;
