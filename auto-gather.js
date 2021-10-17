@@ -23,7 +23,7 @@ async function delay() {
 }
   
   async function getBattleHistory(player = '', data = {}) {
-      //console.log('player', player);
+      console.log('Getting data of :' + player);
       const battleHistory = await fetch(`https://game-api.splinterlands.io/battle/history?player=${player}`)
           .then(async (response) => {
               await delay();

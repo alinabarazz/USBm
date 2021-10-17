@@ -327,7 +327,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                 misc.writeToLog(e);
                 logSummary.push(chalk.red(' No records due to login error'));
                 misc.writeToLog('Skipping this account due to to login error. \n');
-                throw new Error(e);
+                return;
                 });
         });
     }
@@ -384,7 +384,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
         await page.waitForTimeout(3000);
     }
 
-    let curRating = await getElementText(page, 'span.number_text', 2000);
+    let curRating = await getElementText(page, 'span.number_text', 2000).catch(() => {misc.writeToLog('Unable to get current Rating')} );
     misc.writeToLog('Current Rating is ' + chalk.yellow(curRating));
     logSummary.push('Current Rating is ' + chalk.yellow(curRating));
 
@@ -454,14 +454,15 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                 .then(() => misc.writeToLog('start the match'))
                 .catch((e) => {
                     misc.writeToLog('third attempt failed');
-                    throw new Error(e);
+                    logSummary.push(' Unable to proceed to battle due.')
+                    return;
                 })
             })
         })
     } catch (e) {
         misc.writeErrorToLog('[Battle cannot start]:', e)
         logSummary.push(chalk.red(' No records due to battle error'));
-        throw new Error('The Battle cannot start');
+        return;
 
     }
     await page.waitForTimeout(10000);
@@ -682,10 +683,13 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
             await page.goto('https://splinterlands.io/?p=battle_history');
             await waitUntilLoaded(page);
             await page.waitForTimeout(5000);
-            const winner = await await getElementText(page, '.battle-log-entry .battle-log-entry__team.win  .bio__name__display', 15000);
-            const draw = await getElementText(page, '.battle-log-entry .battle-log-entry__vs .conflict__title', 15000);
+            const winner = await getElementText(page, '.battle-log-entry .battle-log-entry__team.win  .bio__name__display', 15000).catch( async () =>{
+                await getElementText(page, '.battle-log-entry .battle-log-entry__team.win  .bio__name__display', 15000)});
+            const draw = await getElementText(page, '.battle-log-entry .battle-log-entry__vs .conflict__title', 15000).catch( async () =>{
+                await getElementText(page, '.battle-log-entry .battle-log-entry__vs .conflict__title', 15000)});
             if (winner.trim() == process.env.ACCUSERNAME.trim()) {
-                const decWon = await getElementText(page, '.battle-log-entry .battle-log-entry__vs.win  .conflict__dec', 1000);
+                const decWon = await getElementText(page, '.battle-log-entry .battle-log-entry__vs.win  .conflict__dec', 1000).catch( async () =>{
+                    await getElementText(page, '.battle-log-entry .battle-log-entry__vs.win  .conflict__dec', 1000)});
                 misc.writeToLog(chalk.green('You won! Reward: ' + decWon));
 				logSummary.push(' Battle result:' + chalk.green(' Win Reward: ' + decWon));
                 newlogvisual['Battle Result'] = 'Win ' + decWon
