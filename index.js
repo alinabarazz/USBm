@@ -753,8 +753,9 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
 		await nq.newquestUpdate(Newquest, claimQuestReward, page, logSummary, allCardDetails, searchFromJSON, newlogvisual);
         teamToPlay = '';
     } catch (e) {
+        misc.writeToLog(' Unable to proceed due to error.' + e)
         logSummary.push(chalk.red(' Unable to proceed due to error. Please see logs'));
-        throw new Error(e);
+        return;
     }
 }
 
