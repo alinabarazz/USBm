@@ -309,7 +309,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
     await page.waitForTimeout(4000);
 
     let username = await getElementText(page, '.dropdown-toggle .bio__name__display', 10000).catch(async () => {
-        await page.goto('https://splinterlands.io/?p=battle_history');
+        await page.goto('https://splinterlands.io');
         await page.waitForTimeout(4000);
         await getElementText(page, '.dropdown-toggle .bio__name__display', 10000)
     });
