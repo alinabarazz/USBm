@@ -21,9 +21,19 @@ function uniqueListByKey(arr, key) {
 async function delay() {
   return new Promise(resolve => {resolve()})
 }
-  
+const twirlTimer = (function() {
+  var P = ["Loading |", "Loading /", "Loading -", "Loading \\"];
+  var x = 0;
+  return setInterval(function() {
+    process.stdout.write("\r" + P[x++]);
+    x &= 3;
+  }, 250);
+})();
+
   async function getBattleHistory(player = '', data = {}) {
-      console.log('Getting data of :' + player);
+    process.stdout.write("gathering data of " + player)
+    process.stdout.cursorTo(0);
+    process.stdout.clearLine();
       const battleHistory = await fetch(`https://game-api.splinterlands.io/battle/history?player=${player}`)
           .then(async (response) => {
               await delay();
@@ -153,6 +163,10 @@ const battles = async (player) =>  await getBattleHistory(player)
   }))
   .then(() => { return Promise.all(promises) })
   .then(() => { return new Promise((res,rej) => {
+    clearInterval(twirlTimer)
+    process.stdout.clearLine();
+    process.stdout.cursorTo(0);
+    misc.writeToLogNoUsername('Done fetching data.');
 	  misc.writeToLog('Reading local battle history');
     fs.readFile(`./data/newHistory.json`, 'utf8', (err, data) => {
       if (err) {
