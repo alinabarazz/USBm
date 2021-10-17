@@ -321,6 +321,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
         await splinterlandsPage.login(page).catch(async () => {
             misc.writeToLog('Unable to login. Trying to reload page again.');
             await page.goto('https://splinterlands.io/?p=battle_history');
+            await page.waitForNavigation({ waitUntil: 'networkidle0' })
             await page.waitForTimeout(4000);
             await getElementText(page, '.dropdown-toggle .bio__name__display', 10000)
                 await splinterlandsPage.login(page).catch(e => {
@@ -336,6 +337,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
         erc = parseInt((await getElementTextByXpath(page, "//div[@class='dec-options'][1]/div[@class='value'][2]/div", 1000)).split('%')[0]);
     } catch {
         await page.goto('https://splinterlands.io/?p=battle_history');
+        await page.waitForNavigation({ waitUntil: 'networkidle0' })
         erc = parseInt((await getElementTextByXpath(page, "//div[@class='dec-options'][1]/div[@class='value'][2]/div", 1000)).split('%')[0]);
     }
     if (erc >= 50) {
@@ -392,6 +394,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
         misc.writeToLog("Seems like battle button menu didn't get clicked correctly - try again");
         misc.writeToLog('Clicking fight menu button again');
         await clickMenuFightButton(page);
+        await page.waitForNavigation({ waitUntil: 'networkidle0' })
         await page.waitForTimeout(5000);
     }
 
@@ -441,12 +444,14 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
             .catch(async() => {
                 misc.writeToLog('second attempt failed reloading from homepage...');
                 await page.goto('https://splinterlands.io/?p=battle_history');
+                await page.waitForNavigation({ waitUntil: 'networkidle0' })
                 await page.waitForTimeout(5000);
                 await page.waitForXPath("//button[contains(., 'BATTLE')]", {
                     timeout: 20000
                 })
                 .then(button => button.click())
                 .catch(e => misc.writeErrorToLog('[ERROR] waiting for Battle button second time'));
+                await page.waitForNavigation({ waitUntil: 'networkidle0' })
                 await page.waitForTimeout(5000);
                 await page.waitForSelector('.btn--create-team', {
                     timeout: 25000
@@ -611,6 +616,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
     await page.waitForTimeout(5000);
     try {
         await sleep(300);
+        await page.waitForNavigation({ waitUntil: 'networkidle0' })
         await page.waitForXPath(`//div[@card_detail_id="${teamToPlay.summoner}"]`, {
             timeout: 15000
         }).then(summonerButton => summonerButton.click()).catch( async (error) =>{ 
@@ -618,6 +624,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
           await page.waitForTimeout(5000);
           page.click('.btn--create-team')[0];
           await page.waitForTimeout(5000);
+          await page.waitForNavigation({ waitUntil: 'networkidle0' })
           await page.waitForXPath(`//div[@card_detail_id="${teamToPlay.summoner}"]`, {
             timeout: 30000
             }).then(summonerButton => summonerButton.click())  
@@ -625,6 +632,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
         if (card.color(teamToPlay.cards[0]) === 'Gold') {
             misc.writeToLog(' Dragon play TEAMCOLOR ' + helper.teamActualSplinterToPlay(splinters,teamToPlay.cards.slice(0, 6)))
             battledata.push(' Dragon play TEAMCOLOR ' + helper.teamActualSplinterToPlay(splinters,teamToPlay.cards.slice(0, 6)))
+            await page.waitForNavigation({ waitUntil: 'networkidle0' })
             await page.waitForXPath(`//div[@data-original-title="${helper.teamActualSplinterToPlay(splinters,teamToPlay.cards.slice(0, 6))}"]`, {
                 timeout: 8000
             })
@@ -633,6 +641,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                 await page.waitForTimeout(5000);
                 page.click('.btn--create-team')[0];
                 await page.waitForTimeout(5000);
+                await page.waitForNavigation({ waitUntil: 'networkidle0' })
                 await page.waitForXPath(`//div[@data-original-title="${helper.teamActualSplinterToPlay(splinters,teamToPlay.cards.slice(0, 6))}"]`, {
                 timeout: 30000
             })
@@ -681,6 +690,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
             misc.writeToLog('Getting battle result...');
             await page.goto('https://splinterlands.io/?p=battle_history');
             await waitUntilLoaded(page);
+            await page.waitForNavigation({ waitUntil: 'networkidle0' })
             await page.waitForTimeout(5000);
             const winner = await await getElementText(page, '.battle-log-entry .battle-log-entry__team.win  .bio__name__display', 15000);
             const draw = await getElementText(page, '.battle-log-entry .battle-log-entry__vs .conflict__title', 15000);
