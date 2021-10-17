@@ -1,5 +1,5 @@
 require('dotenv').config()
-if (process.env.TELEGRAM_NOTIF === 'true') {
+if (process.env.TELEGRAM_NOTIF === 'true'){
 const moment = require("moment");    
 const fetch = require("node-fetch");
 const fs = require('fs')
@@ -13,11 +13,11 @@ const bot = new TeleBot({
         proxy: ''
     } 
 });
-bot.start();  
-
-async function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+function startTG() {
+    return bot.start();
 }
+
+
 async function battlesummary(logSummary,tet,sleepingTime,battletTime,battleID){
     try {
             message = 'Battle result summary: \n' + " " + battletTime + ' \n' + tet.replace(/\u001b[^m]*?m/g,"") + ' \n';
@@ -379,7 +379,7 @@ bot.on(['/questreward'], (msg) => {
 
  
 
-
+module.exports.startTG = startTG;
 exports.sender =sender; 
 exports.battlesummary = battlesummary;
 exports.tbotResponse = tbotResponse;

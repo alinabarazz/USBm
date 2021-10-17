@@ -219,8 +219,8 @@ async function createBrowsers(count, headless) {
                 ],
             });
         const page = await browser.newPage();
-        await page.setDefaultNavigationTimeout(500000);
-        await page.on('dialog', async dialog => {
+        page.setDefaultNavigationTimeout(500000);
+        page.on('dialog', async dialog => {
             await dialog.accept();
         });
 
@@ -287,7 +287,7 @@ async function selectCorrectBattleType(page) {
 }
 
 async function startBotPlayMatch(page, myCards, quest, claimQuestReward, prioritizeQuest, useAPI, logSummary, getDataLocal, battledata, logSummary1, seasonRewards) {
-    newlogvisual = {};
+    let newlogvisual = {};
     const ercThreshold = process.env.ERC_THRESHOLD;
     const allCardDetails = await readJSONFile(fnAllCardsDetails);
     logSummary.push(' \n -----' + process.env.ACCUSERNAME + '-----')
@@ -386,7 +386,6 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
 
     let curRating = await getElementText(page, 'span.number_text', 2000).catch(() => {misc.writeToLog('Unable to get current Rating')} );
     misc.writeToLog('Current Rating is ' + chalk.yellow(curRating));
-    logSummary.push('Current Rating is ' + chalk.yellow(curRating));
 
     if (!page.url().includes("battle_history")) {
         misc.writeToLog("Seems like battle button menu didn't get clicked correctly - try again");
@@ -454,7 +453,8 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                 .then(() => misc.writeToLog('start the match'))
                 .catch((e) => {
                     misc.writeToLog('third attempt failed');
-                    logSummary.push(' Unable to proceed to battle due.')
+                    misc.writeToLog('Skipping account due to error')
+                    logSummary.push(' Skipping account due to error')
                     return;
                 })
             })
@@ -521,7 +521,8 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                         misc.writeToLog('Possible Teams based on your cards: ', possibleTeams.length);
                     } else {
                         misc.writeToLog('Error: ', JSON.stringify(matchDetails), JSON.stringify(possibleTeams))
-                        throw new Error('NO TEAMS available to be played');
+                        logSummary.push(' NO TEAMS available to be played')
+                        return ('NO TEAMS available to be played');
                     }
                     teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);
                     battledata.push( ' Battle data used: Local history')
@@ -537,7 +538,8 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                             misc.writeToLog('Possible Teams based on your cards: ', possibleTeams.length);
                         } else {
                             misc.writeToLog('Error: ', JSON.stringify(matchDetails), JSON.stringify(possibleTeams))
-                            throw new Error('NO TEAMS available to be played');
+                            logSummary.push(' NO TEAMS available to be played')
+                            return;
                         }
                         teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);
                         battledata.push( ' Battle data used: Local history')
@@ -570,6 +572,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                     misc.writeToLog('Possible Teams based on your cards: ' + possibleTeams.length);
                 } else {
                     misc.writeToLog('Error: ', JSON.stringify(matchDetails), JSON.stringify(possibleTeams))
+                    logSummary.push(' NO TEAMS available to be played')
                     throw new Error('NO TEAMS available to be played');
                 }
                 teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);
@@ -584,7 +587,8 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                 misc.writeToLog('Possible Teams based on your cards: ', possibleTeams.length);
             } else {
                 misc.writeToLog('Error: ', JSON.stringify(matchDetails), JSON.stringify(possibleTeams))
-                throw new Error('NO TEAMS available to be played');
+                logSummary.push(' NO TEAMS available to be played');
+                throw new Error(' NO TEAMS available to be played');
             }
             teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);
             battledata.push( ' Battle data used: Local history')
@@ -597,7 +601,8 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
             misc.writeToLog('Possible Teams based on your cards: ', possibleTeams.length);
         } else {
             misc.writeToLog('Error: ', JSON.stringify(matchDetails), JSON.stringify(possibleTeams))
-            throw new Error('NO TEAMS available to be played');
+            logSummary.push(' NO TEAMS available to be played')
+            throw new Error(' NO TEAMS available to be played');
         }
         teamToPlay = await ask.teamSelection(possibleTeams, matchDetails, quest);
         battledata.push( ' Battle data used: Local history')
@@ -605,9 +610,15 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
     }
 
     if (teamToPlay) {
-        page.click('.btn--create-team')[0];
+       await page.click('.btn--create-team')[0];
     } else {
-        throw new Error('Team Selection error');
+        await page.reload().then(() =>{
+        await page.waitForTimeout(5000); 
+        await page.click('.btn--create-team')[0];   
+        }).catch((e) => {
+            logSummary.push('Team Selection error')
+            throw new Error('Team Selection error');
+        })
     }
     await page.waitForTimeout(5000);
     try {
@@ -621,7 +632,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
           await page.waitForTimeout(5000);
           await page.waitForXPath(`//div[@card_detail_id="${teamToPlay.summoner}"]`, {
             timeout: 30000
-            }).then(summonerButton => summonerButton.click())  
+            }).then(summonerButton => summonerButton.click())
         });
         if (card.color(teamToPlay.cards[0]) === 'Gold') {
             misc.writeToLog(' Dragon play TEAMCOLOR ' + helper.teamActualSplinterToPlay(splinters,teamToPlay.cards.slice(0, 6)))
@@ -638,7 +649,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                 timeout: 30000
             })
             .then(selector => selector.click())
-            });   
+            }); 
         }
         await page.waitForTimeout(10000);
         misc.writeToLog('Summoner: ' + chalk.yellow(teamToPlay.summoner.toString().padStart(3)) + ' Name: ' + chalk.green(allCardDetails[(parseInt(teamToPlay.summoner))-1].name.toString()));
@@ -711,6 +722,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
             if (getDataLocal == true) {
                 misc.writeToLog("Gathering winner's battle data for local history backup") 
                 await battles.battlesList(winner).then(x=>x).catch((e) => misc.writeToLog('Unable to gather data for local.' + e));  
+
             }  
         } catch (e) {
                 misc.writeToLog(e);
@@ -765,6 +777,7 @@ const sleepingTime = sleepingTimeInMinutes * 60000;
 
 (async() => {
     try {
+        tn.startTG()
         await checkForUpdate();
         await checkForMissingConfigs();
         const loginViaEmail = JSON.parse(process.env.LOGIN_VIA_EMAIL.toLowerCase());
