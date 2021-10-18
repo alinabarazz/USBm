@@ -1,8 +1,9 @@
 require('dotenv').config()
-const fetch = require('node-fetch');
+const fetch = require('cross-fetch');
 const fs = require('fs');
 const misc = require('./misc');
 const chalk = require('chalk');
+const axios = require('axios');
 
 
 
@@ -33,7 +34,6 @@ async function delay() {
   async function getBattleHistory(player = '', data = {}) {
       const battleHistory = await fetch(`https://game-api.splinterlands.io/battle/history?player=${player}`)
           .then(async (response) => {
-              await delay();
               if (!response.ok) {
                   throw new Error('Network response was not ok '+player);
               }

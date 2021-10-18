@@ -34,5 +34,6 @@
   "bugs": {
     "url": "https://github.com/virgaux/ultimate-splinterlands-bot-mobile/issues"
   },
-  "homepage": "https://github.com/virgaux/ultimate-splinterlands-bot-mobile#readme"
+  "homepage": "https://github.com/virgaux/ultimate-splinterlands-bot-mobile#readme",
+  "devDependencies": {}
 }
