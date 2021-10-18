@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node --max-old-space-size=8192 index.js "
   },
   "author": "virgaux",
   "license": "GPL-3.0",
