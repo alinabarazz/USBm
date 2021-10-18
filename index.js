@@ -326,8 +326,7 @@ async function startBotPlayMatch(page, myCards, quest, claimQuestReward, priorit
                 await splinterlandsPage.login(page).catch(e => {
                 misc.writeToLog(e);
                 logSummary.push(chalk.red(' No records due to login error'));
-                misc.writeToLog('Skipping this account due to to login error. \n');
-                return;
+                throw new error ('Skipping this account due to to login error. \n');
                 });
         });
     }
